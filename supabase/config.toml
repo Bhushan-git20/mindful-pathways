@@ -2,3 +2,6 @@ project_id = "ynnxfvqxztabheooakpa"
 
 [functions.analyze-journal]
 verify_jwt = true
+
+[functions.chatbot]
+verify_jwt = true
