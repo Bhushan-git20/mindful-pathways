@@ -11,6 +11,8 @@ import Assessments from "./pages/Assessments";
 import Journal from "./pages/Journal";
 import Chat from "./pages/Chat";
 import Trends from "./pages/Trends";
+import Admin from "./pages/Admin";
+import Resources from "./pages/Resources";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/journal" element={<Journal />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/trends" element={<Trends />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/resources" element={<Resources />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
