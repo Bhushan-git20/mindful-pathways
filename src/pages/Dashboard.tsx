@@ -1,19 +1,103 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, ClipboardList, BookOpen, MessageCircle, TrendingUp, LogOut, User, AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Brain, ClipboardList, BookOpen, MessageCircle, TrendingUp, LogOut, User, AlertTriangle, Library, Shield } from 'lucide-react';
+
+interface DashboardStats {
+  lastPhq9Score: number | null;
+  lastPhq9Severity: string | null;
+  lastGad7Score: number | null;
+  lastGad7Severity: string | null;
+  journalCount: number;
+  lastRiskLevel: string | null;
+}
 
 export default function Dashboard() {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats>({
+    lastPhq9Score: null,
+    lastPhq9Severity: null,
+    lastGad7Score: null,
+    lastGad7Severity: null,
+    journalCount: 0,
+    lastRiskLevel: null,
+  });
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return;
+
+      // Check admin/counselor role
+      const { data: adminData } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin',
+      });
+      const { data: counselorData } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'counselor',
+      });
+      setIsAdmin(adminData === true || counselorData === true);
+
+      // Fetch last PHQ-9 assessment
+      const { data: phq9Data } = await supabase
+        .from('assessments')
+        .select('total_score, severity')
+        .eq('user_id', user.id)
+        .eq('assessment_type', 'PHQ-9')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      // Fetch last GAD-7 assessment
+      const { data: gad7Data } = await supabase
+        .from('assessments')
+        .select('total_score, severity')
+        .eq('user_id', user.id)
+        .eq('assessment_type', 'GAD-7')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      // Fetch journal count and last risk level
+      const { count: journalCount } = await supabase
+        .from('journal_entries')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      const { data: lastJournal } = await supabase
+        .from('journal_entries')
+        .select('risk_level')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      setStats({
+        lastPhq9Score: phq9Data?.total_score ?? null,
+        lastPhq9Severity: phq9Data?.severity ?? null,
+        lastGad7Score: gad7Data?.total_score ?? null,
+        lastGad7Severity: gad7Data?.severity ?? null,
+        journalCount: journalCount ?? 0,
+        lastRiskLevel: lastJournal?.risk_level ?? null,
+      });
+    };
+
+    if (user) {
+      fetchStats();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -28,6 +112,17 @@ export default function Dashboard() {
   }
 
   const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student';
+
+  const getSeverityColor = (severity: string | null) => {
+    switch (severity) {
+      case 'minimal': return 'bg-success/10 text-success';
+      case 'mild': return 'bg-success/10 text-success';
+      case 'moderate': return 'bg-warning/10 text-warning';
+      case 'moderately_severe': return 'bg-warning/10 text-warning';
+      case 'severe': return 'bg-destructive/10 text-destructive';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
 
   const quickActions = [
     {
@@ -58,6 +153,13 @@ export default function Dashboard() {
       href: '/trends',
       color: 'bg-success/10 text-success',
     },
+    {
+      icon: Library,
+      title: 'Resources',
+      description: 'Mental health resources and support',
+      href: '/resources',
+      color: 'bg-secondary text-secondary-foreground',
+    },
   ];
 
   return (
@@ -70,6 +172,12 @@ export default function Dashboard() {
             <span className="text-lg font-semibold font-display">MindfulU</span>
           </div>
           <div className="flex items-center gap-4">
+            {isAdmin && (
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            )}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
               <span>{userName}</span>
@@ -104,14 +212,19 @@ export default function Dashboard() {
                 If you're in crisis, please contact your campus counseling center or call the 988 Suicide & Crisis Lifeline.
               </p>
             </div>
-            <Button variant="outline" size="sm" className="border-warning/50 text-warning hover:bg-warning/10">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-warning/50 text-warning hover:bg-warning/10"
+              onClick={() => navigate('/resources')}
+            >
               Get Help Now
             </Button>
           </CardContent>
         </Card>
 
         {/* Quick Actions Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {quickActions.map((action) => (
             <Card 
               key={action.title} 
@@ -139,8 +252,19 @@ export default function Dashboard() {
               <CardDescription>Depression screening</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-muted-foreground">--</p>
-              <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
+              {stats.lastPhq9Score !== null ? (
+                <>
+                  <p className="text-3xl font-bold">{stats.lastPhq9Score}</p>
+                  <Badge className={`mt-2 ${getSeverityColor(stats.lastPhq9Severity)}`}>
+                    {stats.lastPhq9Severity?.replace('_', ' ')}
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-muted-foreground">--</p>
+                  <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -150,19 +274,41 @@ export default function Dashboard() {
               <CardDescription>Anxiety screening</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-muted-foreground">--</p>
-              <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
+              {stats.lastGad7Score !== null ? (
+                <>
+                  <p className="text-3xl font-bold">{stats.lastGad7Score}</p>
+                  <Badge className={`mt-2 ${getSeverityColor(stats.lastGad7Severity)}`}>
+                    {stats.lastGad7Severity?.replace('_', ' ')}
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-muted-foreground">--</p>
+                  <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Journal Entries</CardTitle>
-              <CardDescription>This month</CardDescription>
+              <CardDescription>Total entries</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-muted-foreground">0</p>
-              <p className="text-sm text-muted-foreground mt-1">Start journaling today</p>
+              <p className="text-3xl font-bold">{stats.journalCount}</p>
+              {stats.lastRiskLevel && (
+                <Badge className={`mt-2 ${
+                  stats.lastRiskLevel === 'Low' ? 'bg-success/10 text-success' :
+                  stats.lastRiskLevel === 'Medium' ? 'bg-warning/10 text-warning' :
+                  'bg-destructive/10 text-destructive'
+                }`}>
+                  Last: {stats.lastRiskLevel} risk
+                </Badge>
+              )}
+              {stats.journalCount === 0 && (
+                <p className="text-sm text-muted-foreground mt-1">Start journaling today</p>
+              )}
             </CardContent>
           </Card>
         </div>
