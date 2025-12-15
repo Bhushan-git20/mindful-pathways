@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
-import { ArrowLeft, AlertTriangle, MessageCircle } from "lucide-react";
+import AppHeader from "@/components/layout/AppHeader";
+import { AlertTriangle, MessageCircle } from "lucide-react";
 
 export default function Chat() {
   const { user, loading } = useAuth();
@@ -26,16 +26,8 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppHeader />
       <div className="container max-w-3xl py-8 px-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">

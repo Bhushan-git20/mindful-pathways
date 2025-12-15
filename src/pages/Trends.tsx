@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, TrendingUp, Brain, Heart, BookOpen } from "lucide-react";
+import AppHeader from "@/components/layout/AppHeader";
+import { TrendingUp, Brain, Heart, BookOpen } from "lucide-react";
 import { format, subDays } from "date-fns";
 import {
   LineChart,
@@ -152,16 +152,8 @@ export default function Trends() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppHeader />
       <div className="container max-w-6xl py-8 px-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">

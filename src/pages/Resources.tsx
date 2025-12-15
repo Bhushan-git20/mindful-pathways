@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppHeader from '@/components/layout/AppHeader';
 import { 
-  Brain, LogOut, User, ExternalLink, Phone, Heart, 
+  ExternalLink, Phone, Heart, 
   BookOpen, Users, AlertTriangle, Shield, Sparkles 
 } from 'lucide-react';
 
@@ -32,7 +33,7 @@ const categoryIcons: Record<string, React.ElementType> = {
 };
 
 export default function Resources() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loadingResources, setLoadingResources] = useState(true);
@@ -76,8 +77,6 @@ export default function Resources() {
   if (!user) {
     return null;
   }
-
-  const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student';
 
   const emergencyResources = resources.filter((r) => r.is_emergency);
   const categories = [...new Set(resources.filter((r) => !r.is_emergency).map((r) => r.category))];
@@ -173,28 +172,7 @@ export default function Resources() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="text-lg font-semibold font-display">MindfulU</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-              Dashboard
-            </Button>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>{userName}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
       <main className="container py-8">
