@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, ClipboardList, BookOpen, MessageCircle, TrendingUp, LogOut, User, AlertTriangle, Library, Shield } from 'lucide-react';
+import AppHeader from '@/components/layout/AppHeader';
+import { ClipboardList, BookOpen, MessageCircle, TrendingUp, AlertTriangle, Library } from 'lucide-react';
 
 interface DashboardStats {
   lastPhq9Score: number | null;
@@ -17,7 +18,7 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     lastPhq9Score: null,
@@ -27,7 +28,6 @@ export default function Dashboard() {
     journalCount: 0,
     lastRiskLevel: null,
   });
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,17 +38,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       if (!user) return;
-
-      // Check admin/counselor role
-      const { data: adminData } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin',
-      });
-      const { data: counselorData } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'counselor',
-      });
-      setIsAdmin(adminData === true || counselorData === true);
 
       // Fetch last PHQ-9 assessment
       const { data: phq9Data } = await supabase
@@ -164,31 +153,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="text-lg font-semibold font-display">MindfulU</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
-                <Shield className="h-4 w-4 mr-2" />
-                Admin
-              </Button>
-            )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>{userName}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
       <main className="container py-8">

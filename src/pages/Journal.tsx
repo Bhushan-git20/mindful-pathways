@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { JournalEditor } from "@/components/journal/JournalEditor";
 import { JournalList } from "@/components/journal/JournalList";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import AppHeader from "@/components/layout/AppHeader";
+import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface JournalEntry {
@@ -66,16 +66,8 @@ export default function Journal() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppHeader />
       <div className="container max-w-4xl py-8 px-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">My Journal</h1>
           <p className="text-muted-foreground mt-2">

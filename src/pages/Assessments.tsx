@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssessmentForm } from "@/components/assessments/AssessmentForm";
+import AppHeader from "@/components/layout/AppHeader";
 import { ArrowLeft, Brain, Heart, AlertTriangle } from "lucide-react";
 
 type AssessmentType = "PHQ-9" | "GAD-7" | null;
@@ -72,16 +73,8 @@ export default function Assessments() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppHeader />
       <div className="container max-w-4xl py-8 px-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Self-Assessments</h1>
           <p className="text-muted-foreground mt-2">
