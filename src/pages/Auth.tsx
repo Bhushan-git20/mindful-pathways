@@ -64,7 +64,7 @@ export default function Auth() {
         </div>
 
         {/* Right side - Auth Form */}
-        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-[#50bbce]/[0.99]">
+        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-sidebar-primary bg-[sidebar-primary-foreground]">
           {/* Mobile branding */}
           <div className="mb-8 flex items-center gap-2 text-lg font-semibold lg:hidden">
             <Brain className="h-6 w-6 text-primary" />
