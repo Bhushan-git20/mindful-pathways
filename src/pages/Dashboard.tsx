@@ -169,7 +169,7 @@ export default function Dashboard() {
           {quickActions.map(action => <Card key={action.title} className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate(action.href)}>
               <CardHeader className="pb-2">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${action.color}`}>
-                  <action.icon className="h-5 w-5 bg-popover" />
+                  <action.icon className="h-5 w-5 text-muted bg-primary" />
                 </div>
               </CardHeader>
               <CardContent>
