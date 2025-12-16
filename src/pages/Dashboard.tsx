@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import AppHeader from '@/components/layout/AppHeader';
 import { ClipboardList, BookOpen, MessageCircle, TrendingUp, AlertTriangle, Library } from 'lucide-react';
-
 interface DashboardStats {
   lastPhq9Score: number | null;
   lastPhq9Severity: string | null;
@@ -16,9 +15,11 @@ interface DashboardStats {
   journalCount: number;
   lastRiskLevel: string | null;
 }
-
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const {
+    user,
+    loading
+  } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     lastPhq9Score: null,
@@ -26,133 +27,113 @@ export default function Dashboard() {
     lastGad7Score: null,
     lastGad7Severity: null,
     journalCount: 0,
-    lastRiskLevel: null,
+    lastRiskLevel: null
   });
-
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
-
   useEffect(() => {
     const fetchStats = async () => {
       if (!user) return;
 
       // Fetch last PHQ-9 assessment
-      const { data: phq9Data } = await supabase
-        .from('assessments')
-        .select('total_score, severity')
-        .eq('user_id', user.id)
-        .eq('assessment_type', 'PHQ-9')
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .single();
+      const {
+        data: phq9Data
+      } = await supabase.from('assessments').select('total_score, severity').eq('user_id', user.id).eq('assessment_type', 'PHQ-9').order('completed_at', {
+        ascending: false
+      }).limit(1).single();
 
       // Fetch last GAD-7 assessment
-      const { data: gad7Data } = await supabase
-        .from('assessments')
-        .select('total_score, severity')
-        .eq('user_id', user.id)
-        .eq('assessment_type', 'GAD-7')
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .single();
+      const {
+        data: gad7Data
+      } = await supabase.from('assessments').select('total_score, severity').eq('user_id', user.id).eq('assessment_type', 'GAD-7').order('completed_at', {
+        ascending: false
+      }).limit(1).single();
 
       // Fetch journal count and last risk level
-      const { count: journalCount } = await supabase
-        .from('journal_entries')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      const { data: lastJournal } = await supabase
-        .from('journal_entries')
-        .select('risk_level')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
+      const {
+        count: journalCount
+      } = await supabase.from('journal_entries').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('user_id', user.id);
+      const {
+        data: lastJournal
+      } = await supabase.from('journal_entries').select('risk_level').eq('user_id', user.id).order('created_at', {
+        ascending: false
+      }).limit(1).single();
       setStats({
         lastPhq9Score: phq9Data?.total_score ?? null,
         lastPhq9Severity: phq9Data?.severity ?? null,
         lastGad7Score: gad7Data?.total_score ?? null,
         lastGad7Severity: gad7Data?.severity ?? null,
         journalCount: journalCount ?? 0,
-        lastRiskLevel: lastJournal?.risk_level ?? null,
+        lastRiskLevel: lastJournal?.risk_level ?? null
       });
     };
-
     if (user) {
       fetchStats();
     }
   }, [user]);
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+    return <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+      </div>;
   }
-
   if (!user) {
     return null;
   }
-
   const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student';
-
   const getSeverityColor = (severity: string | null) => {
     switch (severity) {
-      case 'minimal': return 'bg-success/10 text-success';
-      case 'mild': return 'bg-success/10 text-success';
-      case 'moderate': return 'bg-warning/10 text-warning';
-      case 'moderately_severe': return 'bg-warning/10 text-warning';
-      case 'severe': return 'bg-destructive/10 text-destructive';
-      default: return 'bg-muted text-muted-foreground';
+      case 'minimal':
+        return 'bg-success/10 text-success';
+      case 'mild':
+        return 'bg-success/10 text-success';
+      case 'moderate':
+        return 'bg-warning/10 text-warning';
+      case 'moderately_severe':
+        return 'bg-warning/10 text-warning';
+      case 'severe':
+        return 'bg-destructive/10 text-destructive';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   };
-
-  const quickActions = [
-    {
-      icon: ClipboardList,
-      title: 'Take Assessment',
-      description: 'Complete PHQ-9 or GAD-7 questionnaire',
-      href: '/assessments',
-      color: 'bg-primary/10 text-primary',
-    },
-    {
-      icon: BookOpen,
-      title: 'Journal Entry',
-      description: 'Write about your thoughts and feelings',
-      href: '/journal',
-      color: 'bg-accent/10 text-accent',
-    },
-    {
-      icon: MessageCircle,
-      title: 'Chat Support',
-      description: 'Get guidance from our AI assistant',
-      href: '/chat',
-      color: 'bg-info/10 text-info',
-    },
-    {
-      icon: TrendingUp,
-      title: 'View Trends',
-      description: 'See your wellness progress over time',
-      href: '/trends',
-      color: 'bg-success/10 text-success',
-    },
-    {
-      icon: Library,
-      title: 'Resources',
-      description: 'Mental health resources and support',
-      href: '/resources',
-      color: 'bg-secondary text-secondary-foreground',
-    },
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const quickActions = [{
+    icon: ClipboardList,
+    title: 'Take Assessment',
+    description: 'Complete PHQ-9 or GAD-7 questionnaire',
+    href: '/assessments',
+    color: 'bg-primary/10 text-primary'
+  }, {
+    icon: BookOpen,
+    title: 'Journal Entry',
+    description: 'Write about your thoughts and feelings',
+    href: '/journal',
+    color: 'bg-accent/10 text-accent'
+  }, {
+    icon: MessageCircle,
+    title: 'Chat Support',
+    description: 'Get guidance from our AI assistant',
+    href: '/chat',
+    color: 'bg-info/10 text-info'
+  }, {
+    icon: TrendingUp,
+    title: 'View Trends',
+    description: 'See your wellness progress over time',
+    href: '/trends',
+    color: 'bg-success/10 text-success'
+  }, {
+    icon: Library,
+    title: 'Resources',
+    description: 'Mental health resources and support',
+    href: '/resources',
+    color: 'bg-secondary text-secondary-foreground'
+  }];
+  return <div className="min-h-screen bg-background">
       <AppHeader />
 
       {/* Main Content */}
@@ -177,12 +158,7 @@ export default function Dashboard() {
                 If you're in crisis, please contact your campus counseling center or call the 988 Suicide & Crisis Lifeline.
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="border-warning/50 text-warning hover:bg-warning/10"
-              onClick={() => navigate('/resources')}
-            >
+            <Button variant="outline" size="sm" className="border-warning/50 text-warning hover:bg-warning/10" onClick={() => navigate('/resources')}>
               Get Help Now
             </Button>
           </CardContent>
@@ -190,23 +166,17 @@ export default function Dashboard() {
 
         {/* Quick Actions Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-          {quickActions.map((action) => (
-            <Card 
-              key={action.title} 
-              className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
-              onClick={() => navigate(action.href)}
-            >
+          {quickActions.map(action => <Card key={action.title} className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate(action.href)}>
               <CardHeader className="pb-2">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${action.color}`}>
-                  <action.icon className="h-5 w-5" />
+                  <action.icon className="h-5 w-5 bg-accent-foreground" />
                 </div>
               </CardHeader>
               <CardContent>
                 <CardTitle className="text-lg">{action.title}</CardTitle>
                 <CardDescription className="mt-1">{action.description}</CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Summary Cards */}
@@ -217,19 +187,15 @@ export default function Dashboard() {
               <CardDescription>Depression screening</CardDescription>
             </CardHeader>
             <CardContent>
-              {stats.lastPhq9Score !== null ? (
-                <>
+              {stats.lastPhq9Score !== null ? <>
                   <p className="text-3xl font-bold">{stats.lastPhq9Score}</p>
                   <Badge className={`mt-2 ${getSeverityColor(stats.lastPhq9Severity)}`}>
                     {stats.lastPhq9Severity?.replace('_', ' ')}
                   </Badge>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <p className="text-3xl font-bold text-muted-foreground">--</p>
                   <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
-                </>
-              )}
+                </>}
             </CardContent>
           </Card>
 
@@ -239,19 +205,15 @@ export default function Dashboard() {
               <CardDescription>Anxiety screening</CardDescription>
             </CardHeader>
             <CardContent>
-              {stats.lastGad7Score !== null ? (
-                <>
+              {stats.lastGad7Score !== null ? <>
                   <p className="text-3xl font-bold">{stats.lastGad7Score}</p>
                   <Badge className={`mt-2 ${getSeverityColor(stats.lastGad7Severity)}`}>
                     {stats.lastGad7Severity?.replace('_', ' ')}
                   </Badge>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <p className="text-3xl font-bold text-muted-foreground">--</p>
                   <p className="text-sm text-muted-foreground mt-1">No assessment yet</p>
-                </>
-              )}
+                </>}
             </CardContent>
           </Card>
 
@@ -262,18 +224,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{stats.journalCount}</p>
-              {stats.lastRiskLevel && (
-                <Badge className={`mt-2 ${
-                  stats.lastRiskLevel === 'Low' ? 'bg-success/10 text-success' :
-                  stats.lastRiskLevel === 'Medium' ? 'bg-warning/10 text-warning' :
-                  'bg-destructive/10 text-destructive'
-                }`}>
+              {stats.lastRiskLevel && <Badge className={`mt-2 ${stats.lastRiskLevel === 'Low' ? 'bg-success/10 text-success' : stats.lastRiskLevel === 'Medium' ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
                   Last: {stats.lastRiskLevel} risk
-                </Badge>
-              )}
-              {stats.journalCount === 0 && (
-                <p className="text-sm text-muted-foreground mt-1">Start journaling today</p>
-              )}
+                </Badge>}
+              {stats.journalCount === 0 && <p className="text-sm text-muted-foreground mt-1">Start journaling today</p>}
             </CardContent>
           </Card>
         </div>
@@ -287,6 +241,5 @@ export default function Dashboard() {
           </p>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 }
