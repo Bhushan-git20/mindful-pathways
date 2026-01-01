@@ -1,35 +1,20 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library } from 'lucide-react';
+import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-const navItems = [{
-  href: '/dashboard',
-  label: 'Dashboard',
-  icon: Home
-}, {
-  href: '/assessments',
-  label: 'Assessments',
-  icon: ClipboardList
-}, {
-  href: '/journal',
-  label: 'Journal',
-  icon: BookOpen
-}, {
-  href: '/chat',
-  label: 'Chat',
-  icon: MessageCircle
-}, {
-  href: '/trends',
-  label: 'Trends',
-  icon: TrendingUp
-}, {
-  href: '/resources',
-  label: 'Resources',
-  icon: Library
-}];
+
+const navItems = [
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/assessments', label: 'Self-Assessment', icon: ClipboardList },
+  { href: '/trends', label: 'Insights', icon: TrendingUp },
+  { href: '/journal', label: 'Journal', icon: BookOpen },
+  { href: '/resources', label: 'Resources', icon: Library },
+  { href: '/chat', label: 'Chatbot', icon: MessageCircle },
+  { href: '/history', label: 'History', icon: History },
+];
 export default function AppHeader() {
   const {
     user,
@@ -63,8 +48,7 @@ export default function AppHeader() {
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
           <Brain className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold font-display">Mindify
-        </span>
+          <span className="text-lg font-semibold font-display">MindMate</span>
         </div>
 
         {/* Navigation */}
