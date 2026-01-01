@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Send, Loader2, Bot, User, AlertTriangle } from "lucide-react";
 
 interface Message {
@@ -14,6 +15,7 @@ interface Message {
 }
 
 export function ChatInterface() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -24,7 +26,43 @@ export function ChatInterface() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation history on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user || historyLoaded) return;
+      
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('id, role, content, message_type, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(50);
+      
+      if (data && data.length > 0) {
+        const history: Message[] = data.map(m => ({
+          id: m.id,
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          type: m.message_type as Message["type"]
+        }));
+        setMessages([
+          {
+            id: "welcome",
+            role: "assistant",
+            content: "Welcome back! Here's our conversation history. How can I help you today?",
+            type: "ai"
+          },
+          ...history
+        ]);
+      }
+      setHistoryLoaded(true);
+    };
+    
+    loadHistory();
+  }, [user, historyLoaded]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -46,6 +84,16 @@ export function ChatInterface() {
     setIsLoading(true);
 
     try {
+      // Save user message to database
+      if (user) {
+        await supabase.from('chat_messages').insert({
+          user_id: user.id,
+          role: 'user',
+          content: userMessage.content,
+          message_type: 'general'
+        });
+      }
+
       const conversationHistory = messages
         .filter(m => m.id !== "welcome")
         .map(m => ({ role: m.role, content: m.content }));
@@ -65,6 +113,16 @@ export function ChatInterface() {
         content: data.message,
         type: data.type
       };
+
+      // Save assistant response to database
+      if (user) {
+        await supabase.from('chat_messages').insert({
+          user_id: user.id,
+          role: 'assistant',
+          content: data.message,
+          message_type: data.type || 'ai'
+        });
+      }
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
