@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppHeader from '@/components/layout/AppHeader';
 import { 
   ExternalLink, Phone, Heart, 
-  BookOpen, Users, AlertTriangle, Shield, Sparkles 
+  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music 
 } from 'lucide-react';
 
 interface Resource {
@@ -30,6 +30,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   'Campus Resources': Users,
   'Coping Strategies': Sparkles,
   'Professional Help': Shield,
+  'Music & Relaxation': Music,
 };
 
 export default function Resources() {
@@ -123,13 +124,14 @@ export default function Resources() {
 
   // Default helpful resources if none in database
   const defaultResources = [
+    // Coping Strategies
     {
       id: 'self-1',
       title: 'Breathing Exercises',
       description: 'Simple techniques for immediate calm',
       content: 'Try the 4-7-8 technique: Inhale for 4 seconds, hold for 7 seconds, exhale for 8 seconds. Repeat 3-4 times.',
       category: 'Coping Strategies',
-      external_url: null,
+      external_url: 'https://www.healthline.com/health/breathing-exercises-for-anxiety',
       is_emergency: false,
       risk_band_target: null,
     },
@@ -139,10 +141,21 @@ export default function Resources() {
       description: '5-4-3-2-1 sensory method',
       content: 'Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.',
       category: 'Coping Strategies',
-      external_url: null,
+      external_url: 'https://www.healthline.com/health/grounding-techniques',
       is_emergency: false,
       risk_band_target: null,
     },
+    {
+      id: 'self-3',
+      title: 'Mindfulness Meditation Guide',
+      description: 'Free guided meditations for beginners',
+      content: 'Learn mindfulness techniques to reduce stress and improve focus with step-by-step guides.',
+      category: 'Coping Strategies',
+      external_url: 'https://www.mindful.org/how-to-meditate/',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    // Educational
     {
       id: 'edu-1',
       title: 'Understanding Anxiety',
@@ -160,6 +173,109 @@ export default function Resources() {
       content: 'Depression is more than feeling sad. It is a treatable condition that affects how you think, feel, and function.',
       category: 'Educational',
       external_url: 'https://www.nimh.nih.gov/health/topics/depression',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'edu-3',
+      title: 'Mental Health America Resources',
+      description: 'Comprehensive mental health information',
+      content: 'Access screening tools, fact sheets, and resources for various mental health conditions.',
+      category: 'Educational',
+      external_url: 'https://www.mhanational.org/mental-health-resources',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    // Self-Help
+    {
+      id: 'help-1',
+      title: 'Headspace - Meditation App',
+      description: 'Guided meditation and mindfulness',
+      content: 'Popular app offering guided meditations, sleep sounds, and mindfulness exercises.',
+      category: 'Self-Help',
+      external_url: 'https://www.headspace.com/',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'help-2',
+      title: 'Calm - Sleep & Meditation',
+      description: 'Relaxation and better sleep',
+      content: 'App featuring sleep stories, breathing exercises, and calming music for relaxation.',
+      category: 'Self-Help',
+      external_url: 'https://www.calm.com/',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    // Professional Help
+    {
+      id: 'pro-1',
+      title: 'Psychology Today - Find a Therapist',
+      description: 'Search for mental health professionals',
+      content: 'Find therapists, psychiatrists, and counselors in your area with detailed profiles and specializations.',
+      category: 'Professional Help',
+      external_url: 'https://www.psychologytoday.com/us/therapists',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'pro-2',
+      title: 'BetterHelp Online Therapy',
+      description: 'Connect with licensed therapists online',
+      content: 'Access professional counseling through text, phone, or video sessions from anywhere.',
+      category: 'Professional Help',
+      external_url: 'https://www.betterhelp.com/',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    // Music & Relaxation - YouTube Links
+    {
+      id: 'music-1',
+      title: 'Relaxing Piano Music',
+      description: 'Calming piano melodies for stress relief',
+      content: '3 hours of beautiful piano music to help you relax, study, or sleep peacefully.',
+      category: 'Music & Relaxation',
+      external_url: 'https://www.youtube.com/watch?v=77ZozI0rw7w',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'music-2',
+      title: 'Nature Sounds & Meditation',
+      description: 'Forest sounds and peaceful nature ambience',
+      content: 'Immerse yourself in calming nature sounds perfect for meditation, relaxation, or background ambience.',
+      category: 'Music & Relaxation',
+      external_url: 'https://www.youtube.com/watch?v=eKFTSSKCzWA',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'music-3',
+      title: 'Lofi Hip Hop Radio',
+      description: 'Chill beats for studying and relaxation',
+      content: '24/7 live stream of relaxing lo-fi beats perfect for studying, working, or unwinding.',
+      category: 'Music & Relaxation',
+      external_url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'music-4',
+      title: 'Guided Sleep Meditation',
+      description: 'Fall asleep faster with guided relaxation',
+      content: 'Soothing voice guides you through a peaceful journey to help you drift into restful sleep.',
+      category: 'Music & Relaxation',
+      external_url: 'https://www.youtube.com/watch?v=aEqlQvczMJQ',
+      is_emergency: false,
+      risk_band_target: null,
+    },
+    {
+      id: 'music-5',
+      title: 'Anxiety Relief Music',
+      description: 'Calming frequencies for anxiety reduction',
+      content: 'Specially designed music with calming frequencies to help reduce anxiety and promote relaxation.',
+      category: 'Music & Relaxation',
+      external_url: 'https://www.youtube.com/watch?v=lFcSrYw-ARY',
       is_emergency: false,
       risk_band_target: null,
     },
