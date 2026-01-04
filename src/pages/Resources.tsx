@@ -9,8 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppHeader from '@/components/layout/AppHeader';
 import { 
   ExternalLink, Phone, Heart, 
-  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music 
+  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play 
 } from 'lucide-react';
+
+// Helper to extract YouTube video ID from URL
+const getYouTubeVideoId = (url: string | null): string | null => {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+};
 
 interface Resource {
   id: string;
@@ -356,11 +363,30 @@ export default function Resources() {
                 <div className="animate-pulse text-muted-foreground">Loading resources...</div>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className={`grid gap-4 ${
+                activeCategory === 'Music & Relaxation' 
+                  ? 'md:grid-cols-1 lg:grid-cols-2' 
+                  : 'md:grid-cols-2 lg:grid-cols-3'
+              }`}>
                 {displayResources.map((resource) => {
                   const IconComponent = categoryIcons[resource.category] || BookOpen;
+                  const isMusic = resource.category === 'Music & Relaxation';
+                  const videoId = isMusic ? getYouTubeVideoId(resource.external_url) : null;
+                  
                   return (
-                    <Card key={resource.id} className="hover:shadow-md transition-shadow">
+                    <Card key={resource.id} className="hover:shadow-md transition-shadow overflow-hidden">
+                      {/* Embedded YouTube Player for Music */}
+                      {isMusic && videoId && (
+                        <div className="aspect-video w-full bg-muted">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${videoId}`}
+                            title={resource.title}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full"
+                          />
+                        </div>
+                      )}
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
                           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -379,7 +405,7 @@ export default function Resources() {
                         {resource.content && (
                           <p className="text-sm text-muted-foreground mb-4">{resource.content}</p>
                         )}
-                        {resource.external_url && (
+                        {resource.external_url && !isMusic && (
                           <a
                             href={resource.external_url}
                             target="_blank"
@@ -387,6 +413,19 @@ export default function Resources() {
                           >
                             <Button variant="outline" size="sm" className="w-full">
                               Learn More
+                              <ExternalLink className="h-4 w-4 ml-2" />
+                            </Button>
+                          </a>
+                        )}
+                        {resource.external_url && isMusic && (
+                          <a
+                            href={resource.external_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button variant="outline" size="sm" className="w-full">
+                              <Play className="h-4 w-4 mr-2" />
+                              Open in YouTube
                               <ExternalLink className="h-4 w-4 ml-2" />
                             </Button>
                           </a>
