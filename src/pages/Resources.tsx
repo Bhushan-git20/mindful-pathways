@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppHeader from '@/components/layout/AppHeader';
 import { 
   ExternalLink, Phone, Heart, 
-  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play 
+  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play, Search, X
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 // Helper to extract YouTube video ID from URL
 const getYouTubeVideoId = (url: string | null): string | null => {
@@ -50,6 +51,7 @@ export default function Resources() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loadingResources, setLoadingResources] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -332,9 +334,21 @@ export default function Resources() {
     },
   ];
 
-  const displayResources = filteredResources.length > 0 ? filteredResources : defaultResources.filter(
+  // Apply search filter
+  const searchFilter = (resource: Resource) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      resource.title.toLowerCase().includes(query) ||
+      (resource.description?.toLowerCase().includes(query)) ||
+      (resource.content?.toLowerCase().includes(query)) ||
+      resource.category.toLowerCase().includes(query)
+    );
+  };
+
+  const displayResources = (filteredResources.length > 0 ? filteredResources : defaultResources.filter(
     (r) => activeCategory === 'all' || r.category === activeCategory
-  );
+  )).filter(searchFilter);
   const displayCategories = categories.length > 0 ? categories : [...new Set(defaultResources.map((r) => r.category))];
 
   return (
@@ -348,6 +362,26 @@ export default function Resources() {
           <p className="mt-2 text-muted-foreground">
             Curated resources to support your mental wellness journey
           </p>
+          
+          {/* Search Bar */}
+          <div className="relative mt-4 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search resources by topic, keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Emergency Resources Banner */}
