@@ -273,40 +273,40 @@ export default function Dashboard() {
       title: 'Self-Assessment',
       description: 'Take a PHQ-9 or GAD-7 questionnaire',
       href: '/assessments',
-      gradient: 'from-blue-500 to-cyan-500',
-      iconBg: 'bg-blue-500/10'
+      gradient: 'from-primary to-primary/70',
+      iconBg: 'bg-primary/10'
     },
     {
       icon: BookOpen,
       title: 'Journal Entry',
       description: 'Write about your thoughts and feelings',
       href: '/journal',
-      gradient: 'from-purple-500 to-pink-500',
-      iconBg: 'bg-purple-500/10'
+      gradient: 'from-secondary to-secondary/70',
+      iconBg: 'bg-secondary/10'
     },
     {
       icon: MessageCircle,
       title: 'Chatbot Support',
       description: 'Get guidance from our AI assistant',
       href: '/chat',
-      gradient: 'from-teal-500 to-emerald-500',
-      iconBg: 'bg-teal-500/10'
+      gradient: 'from-info to-info/70',
+      iconBg: 'bg-info/10'
     },
     {
       icon: TrendingUp,
       title: 'View Insights',
       description: 'See your wellness progress over time',
       href: '/trends',
-      gradient: 'from-orange-500 to-amber-500',
-      iconBg: 'bg-orange-500/10'
+      gradient: 'from-warning to-warning/70',
+      iconBg: 'bg-warning/10'
     },
     {
       icon: Library,
       title: 'Resources',
       description: 'Mental health resources and support',
       href: '/resources',
-      gradient: 'from-indigo-500 to-violet-500',
-      iconBg: 'bg-indigo-500/10'
+      gradient: 'from-success to-success/70',
+      iconBg: 'bg-success/10'
     }
   ];
 
@@ -352,7 +352,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
       <AppHeader />
 
       <motion.main 

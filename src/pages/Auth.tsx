@@ -37,25 +37,28 @@ export default function Auth() {
     title: 'AI Support',
     description: 'Get guidance and resources tailored to your needs'
   }];
-  return <div className="min-h-screen gradient-hero">
+  return <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <div className="container relative flex min-h-screen flex-col items-center justify-center py-12 lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         {/* Left side - Branding */}
-        <div className="relative hidden h-full flex-col bg-primary p-10 text-primary-foreground lg:flex">
-          <div className="absolute inset-0 gradient-calm opacity-90" />
-          <div className="relative z-20 flex items-center gap-2 text-lg font-semibold">
-            <Brain className="h-6 w-6" />
-            <span className="font-display">MindfulU</span>
+        <div className="relative hidden h-full flex-col p-10 text-primary-foreground lg:flex overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+          <div className="relative z-20 flex items-center gap-3 text-lg font-semibold">
+            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Brain className="h-6 w-6" />
+            </div>
+            <span className="font-display text-2xl">MindMate</span>
           </div>
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
-              <p className="text-lg">
+              <p className="text-xl font-medium leading-relaxed">
                 "Taking care of your mental health is not a luxury, it's a necessity."
               </p>
               <footer className="text-sm opacity-80">— Student Mental Health Initiative</footer>
             </blockquote>
           </div>
           <div className="relative z-20 mt-8 grid grid-cols-2 gap-4">
-            {features.map(feature => <div key={feature.title} className="space-y-2 rounded-lg bg-primary-foreground/10 p-4">
+            {features.map(feature => <div key={feature.title} className="space-y-2 rounded-xl bg-white/10 backdrop-blur-sm p-4 border border-white/20">
                 <feature.icon className="h-5 w-5" />
                 <h3 className="font-medium">{feature.title}</h3>
                 <p className="text-sm opacity-80">{feature.description}</p>
@@ -64,11 +67,13 @@ export default function Auth() {
         </div>
 
         {/* Right side - Auth Form */}
-        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-[sidebar-primary-foreground] bg-info">
+        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-card/80 backdrop-blur-sm">
           {/* Mobile branding */}
-          <div className="mb-8 flex items-center gap-2 text-lg font-semibold lg:hidden">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="font-display">MindfulU</span>
+          <div className="mb-8 flex items-center gap-3 text-lg font-semibold lg:hidden">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <Brain className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="font-display text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">MindMate</span>
           </div>
 
           <AuthForm mode={mode} onToggleMode={() => setMode(mode === 'signin' ? 'signup' : 'signin')} />
