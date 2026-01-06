@@ -43,17 +43,19 @@ export default function AppHeader() {
     };
     checkAdmin();
   }, [user]);
-  return <header className="border-b bg-card sticky top-0 z-50">
+  return <header className="border-b bg-gradient-to-r from-card via-card to-primary/5 sticky top-0 z-50 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
-          <Brain className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold font-display">MindMate</span>
+        <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/dashboard')}>
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow transition-transform group-hover:scale-105">
+            <Brain className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">MindMate</span>
         </div>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'secondary' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className="gap-2">
+          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'default' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className={`gap-2 ${location.pathname === item.href ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-primary/10'}`}>
               <item.icon className="h-4 w-4" />
               <span className="hidden lg:inline">{item.label}</span>
             </Button>)}
@@ -93,9 +95,9 @@ export default function AppHeader() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t overflow-x-auto">
+      <div className="md:hidden border-t bg-gradient-to-r from-muted/30 to-primary/5 overflow-x-auto">
         <nav className="container flex items-center gap-1 py-2">
-          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'secondary' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className="flex-shrink-0">
+          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'default' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className={`flex-shrink-0 ${location.pathname === item.href ? 'bg-primary text-primary-foreground' : ''}`}>
               <item.icon className="h-4 w-4" />
             </Button>)}
         </nav>

@@ -12,174 +12,169 @@
 @tailwind utilities;
 
 /* MindfulU - Student Mental Health Platform Design System
-   A calming, modern aesthetic with soft teal accents
+   A vibrant, calming aesthetic with healing gradients
    All colors are HSL
 */
 
 @layer base {
   :root {
-    /* Core palette - calming teal/sage theme */
-    --background: 0 0% 96%;
-    --foreground: 0 0% 9%;
+    /* Core palette - vibrant healing theme */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 0 0% 89%;
-    --popover-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary - calming teal */
-    --primary: 243 75% 58%;
-    --primary-foreground: 225 100% 96%;
+    /* Primary - calming indigo-purple */
+    --primary: 250 89% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary - soft sage */
-    --secondary: 0 0% 32%;
-    --secondary-foreground: 0 0% 98%;
+    /* Secondary - soft teal for balance */
+    --secondary: 174 58% 39%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted - gentle gray-blue */
-    --muted: 0 0% 63%;
-    --muted-foreground: 0 0% 9%;
+    /* Muted - gentle lavender gray */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* Accent - warm coral for highlights */
-    --accent: 250 100% 97%;
-    --accent-foreground: 258 89% 66%;
+    /* Accent - warm peach/coral for highlights */
+    --accent: 24 95% 92%;
+    --accent-foreground: 24 80% 35%;
 
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 83%;
-    --input: 0 0% 83%;
-    --ring: 243 75% 58%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 250 89% 65%;
 
-    --radius: 1.25rem;
+    --radius: 1rem;
 
     /* Semantic colors for mental health indicators */
-    --success: 142 55% 45%;
+    --success: 152 69% 42%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --info: 200 80% 50%;
+    --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
     /* Risk level colors */
-    --risk-low: 142 55% 45%;
+    --risk-low: 152 69% 42%;
     --risk-medium: 38 92% 50%;
-    --risk-high: 0 72% 51%;
+    --risk-high: 0 84% 60%;
 
     /* Severity band colors */
-    --severity-minimal: 142 55% 45%;
-    --severity-mild: 80 50% 45%;
+    --severity-minimal: 152 69% 42%;
+    --severity-mild: 80 60% 45%;
     --severity-moderate: 38 92% 50%;
-    --severity-moderately-severe: 25 80% 50%;
-    --severity-severe: 0 72% 51%;
+    --severity-moderately-severe: 25 95% 53%;
+    --severity-severe: 0 84% 60%;
 
     /* Gradients */
-    --gradient-calm: linear-gradient(135deg, hsl(174, 42%, 45%), hsl(200, 50%, 50%));
-    --gradient-warm: linear-gradient(135deg, hsl(15, 70%, 60%), hsl(38, 92%, 50%));
-    --gradient-hero: linear-gradient(180deg, hsl(180, 20%, 99%), hsl(174, 30%, 95%));
+    --gradient-calm: linear-gradient(135deg, hsl(250 89% 65%), hsl(280 84% 65%));
+    --gradient-warm: linear-gradient(135deg, hsl(24 95% 65%), hsl(38 92% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(250 89% 97%), hsl(280 60% 97%));
+    --gradient-teal: linear-gradient(135deg, hsl(174 58% 39%), hsl(199 89% 48%));
+    --gradient-sunset: linear-gradient(135deg, hsl(340 82% 65%), hsl(24 95% 65%));
+    --gradient-nature: linear-gradient(135deg, hsl(152 69% 42%), hsl(174 58% 39%));
 
     /* Shadows */
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-glow: 0 0 20px hsl(174 42% 45% / 0.25);
+    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
+    --shadow-glow: 0 0 25px hsl(250 89% 65% / 0.3);
+    --shadow-glow-teal: 0 0 25px hsl(174 58% 39% / 0.3);
 
     /* Sidebar */
-    --sidebar-background: 180 20% 98%;
-    --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 243 75% 58%;
-    --sidebar-primary-foreground: 225 100% 96%;
-    --sidebar-accent: 0 0% 32%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 83%;
-    --sidebar-ring: 243 75% 58%;
-    --chart-1: 234 89% 73%;
-    --chart-2: 255 91% 76%;
-    --chart-3: 270 95% 75%;
-    --chart-4: 238 83% 66%;
-    --chart-5: 0 0% 45%;
-    --sidebar: 0 0% 98%;
+    --sidebar-background: 250 89% 97%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 250 89% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 280 84% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 250 89% 65%;
+    --sidebar: 250 89% 97%;
+    
+    /* Chart colors - vibrant palette */
+    --chart-1: 250 89% 65%;
+    --chart-2: 174 58% 39%;
+    --chart-3: 340 82% 65%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 152 69% 42%;
+    
     --font-sans: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'EB Garamond', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0 hsl(222 47% 11% / 0.03);
+    --shadow-xs: 0 1px 3px 0 hsl(222 47% 11% / 0.04);
+    --shadow: 0 1px 3px 0 hsl(222 47% 11% / 0.1), 0 1px 2px -1px hsl(222 47% 11% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(222 47% 11% / 0.1), 0 8px 10px -6px hsl(222 47% 11% / 0.1);
+    --shadow-2xl: 0 25px 50px -12px hsl(222 47% 11% / 0.25);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
 
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 14%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 25%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 234 89% 73%;
-    --primary-foreground: 243 47% 20%;
+    --primary: 250 89% 70%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 0 0% 45%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 174 58% 45%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 0 0% 45%;
-    --muted-foreground: 0 0% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 261 72% 22%;
-    --accent-foreground: 255 91% 76%;
+    --accent: 280 84% 20%;
+    --accent-foreground: 280 84% 75%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 32%;
-    --input: 0 0% 32%;
-    --ring: 234 89% 73%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 250 89% 70%;
 
-    --sidebar-background: 200 25% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 234 89% 73%;
-    --sidebar-primary-foreground: 243 47% 20%;
-    --sidebar-accent: 255 91% 76%;
-    --sidebar-accent-foreground: 261 72% 22%;
-    --sidebar-border: 0 0% 32%;
-    --sidebar-ring: 234 89% 73%;
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 250 89% 70%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 280 84% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 250 89% 70%;
+    --sidebar: 222 47% 11%;
 
-    --gradient-hero: linear-gradient(180deg, hsl(200, 25%, 8%), hsl(200, 25%, 12%));
+    --gradient-hero: linear-gradient(135deg, hsl(250 50% 12%), hsl(280 40% 12%));
 
-    --chart-1: 229 93% 81%;
+    --chart-1: 250 89% 70%;
+    --chart-2: 174 58% 50%;
+    --chart-3: 340 82% 70%;
+    --chart-4: 38 92% 55%;
+    --chart-5: 152 69% 50%;
 
-    --chart-2: 252 94% 85%;
-
-    --chart-3: 269 97% 85%;
-
-    --chart-4: 234 89% 73%;
-
-    --chart-5: 0 0% 45%;
-
-    --sidebar: 0 0% 14%;
-
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.1);
+    --shadow-xs: 0 1px 3px 0 hsl(0 0% 0% / 0.1);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.15);
+    --shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.2), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -215,8 +210,24 @@
     background: var(--gradient-hero);
   }
 
+  .gradient-teal {
+    background: var(--gradient-teal);
+  }
+
+  .gradient-sunset {
+    background: var(--gradient-sunset);
+  }
+
+  .gradient-nature {
+    background: var(--gradient-nature);
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-glow-teal {
+    box-shadow: var(--shadow-glow-teal);
   }
 
   .animate-fade-in {
