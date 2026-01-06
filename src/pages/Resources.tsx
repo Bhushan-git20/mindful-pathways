@@ -32,11 +32,15 @@ interface Resource {
 
 const categoryIcons: Record<string, React.ElementType> = {
   'Crisis Support': Phone,
+  'crisis': Phone,
   'Self-Help': Heart,
+  'self-help': Heart,
   'Educational': BookOpen,
+  'education': BookOpen,
   'Campus Resources': Users,
   'Coping Strategies': Sparkles,
   'Professional Help': Shield,
+  'professional': Shield,
   'Music & Relaxation': Music,
 };
 
