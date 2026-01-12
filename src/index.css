@@ -18,8 +18,8 @@
 
 @layer base {
   :root {
-    /* Core palette - vibrant healing theme */
-    --background: 210 40% 98%;
+    /* Core palette - vibrant healing theme with beige background */
+    --background: 34 36% 93%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
