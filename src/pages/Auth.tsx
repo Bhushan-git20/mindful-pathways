@@ -43,13 +43,13 @@ export default function Auth() {
         <div className="relative hidden h-full flex-col p-10 text-primary-foreground lg:flex overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
-          <div className="relative z-20 flex items-center gap-3 text-lg font-semibold">
-            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="relative z-20 flex items-center gap-3 text-lg font-semibold animate-fade-in-down">
+            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-6">
               <Brain className="h-6 w-6" />
             </div>
             <span className="font-display text-2xl">MindMate</span>
           </div>
-          <div className="relative z-20 mt-auto">
+          <div className="relative z-20 mt-auto animate-fade-in-left">
             <blockquote className="space-y-2">
               <p className="text-xl font-medium leading-relaxed">
                 "Taking care of your mental health is not a luxury, it's a necessity."
@@ -58,8 +58,12 @@ export default function Auth() {
             </blockquote>
           </div>
           <div className="relative z-20 mt-8 grid grid-cols-2 gap-4">
-            {features.map(feature => <div key={feature.title} className="space-y-2 rounded-xl bg-white/10 backdrop-blur-sm p-4 border border-white/20">
-                <feature.icon className="h-5 w-5" />
+            {features.map((feature, index) => <div 
+                key={feature.title} 
+                className="space-y-2 rounded-xl bg-white/10 backdrop-blur-sm p-4 border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg animate-fade-in-up opacity-0"
+                style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'forwards' }}
+              >
+                <feature.icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="font-medium">{feature.title}</h3>
                 <p className="text-sm opacity-80">{feature.description}</p>
               </div>)}
@@ -67,10 +71,10 @@ export default function Auth() {
         </div>
 
         {/* Right side - Auth Form */}
-        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-card/80 backdrop-blur-sm">
+        <div className="flex w-full flex-col items-center justify-center px-4 lg:px-8 bg-card/80 backdrop-blur-sm animate-fade-in">
           {/* Mobile branding */}
-          <div className="mb-8 flex items-center gap-3 text-lg font-semibold lg:hidden">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+          <div className="mb-8 flex items-center gap-3 text-lg font-semibold lg:hidden group">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
               <Brain className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="font-display text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">MindMate</span>
@@ -78,8 +82,8 @@ export default function Auth() {
 
           <AuthForm mode={mode} onToggleMode={() => setMode(mode === 'signin' ? 'signup' : 'signin')} />
 
-          <div className="mt-8 max-w-sm text-center">
-            <div className="rounded-lg border border-border/50 bg-card/50 p-4">
+          <div className="mt-8 max-w-sm text-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="rounded-lg border border-border/50 bg-card/50 p-4 transition-all duration-300 hover:border-primary/30 hover:shadow-sm">
               <p className="text-xs text-muted-foreground">
                 <strong>Important:</strong> This platform is a screening and self-help tool, not a diagnostic service or replacement for professional mental health care. If you're in crisis, please contact emergency services or a crisis helpline immediately.
               </p>
