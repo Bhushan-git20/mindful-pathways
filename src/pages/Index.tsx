@@ -48,10 +48,10 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       {/* Header */}
-      <header className="container py-6">
+      <header className="container py-6 animate-fade-in-down">
         <nav className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow">
+          <div className="flex items-center gap-3 group">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow transition-transform duration-300 group-hover:scale-110">
               <Brain className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-semibold font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">MindMate</span>
@@ -61,7 +61,7 @@ export default function Index() {
               <Button variant="ghost" className="hover:bg-primary/10">Sign In</Button>
             </Link>
             <Link to="/auth">
-              <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md">Get Started</Button>
+              <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-md hover:shadow-lg">Get Started</Button>
             </Link>
           </div>
         </nav>
@@ -70,25 +70,25 @@ export default function Index() {
       {/* Hero Section - Welcome Banner */}
       <section className="container py-16 md:py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-            <Sparkles className="h-4 w-4" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in-up opacity-0 stagger-1">
+            <Sparkles className="h-4 w-4 animate-pulse-gentle" />
             Your mental wellness companion
           </div>
-          <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl animate-fade-in-up opacity-0 stagger-2">
             Welcome to <span className="bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">MindMate</span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+          <p className="mt-6 text-lg text-muted-foreground md:text-xl animate-fade-in-up opacity-0 stagger-3">
             Enhance your mental well-being with personalized insights, AI-powered support, and evidence-based tools designed for students.
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up opacity-0 stagger-4">
             <Link to="/auth">
-              <Button size="lg" className="px-8 bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-lg">
+              <Button size="lg" className="px-8 bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 Start Self-Assessment
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" variant="outline" className="px-8 border-primary/30 hover:bg-primary/10">
+              <Button size="lg" variant="outline" className="px-8 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300">
                 Learn More
               </Button>
             </Link>
@@ -99,17 +99,18 @@ export default function Index() {
       {/* Feature Cards */}
       <section className="container py-12">
         <div className="grid gap-6 md:grid-cols-3">
-          {featureCards.map((card) => (
+          {featureCards.map((card, index) => (
             <Card 
               key={card.title} 
-              className="group cursor-pointer transition-all hover:shadow-xl hover:border-primary/30 hover:-translate-y-1 overflow-hidden"
+              className={`group cursor-pointer overflow-hidden card-interactive animate-fade-in-up opacity-0`}
+              style={{ animationDelay: `${0.2 + index * 0.1}s` }}
               onClick={() => navigate('/auth')}
             >
               <CardHeader>
-                <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${card.gradient} shadow-md`}>
+                <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${card.gradient} shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                   <card.icon className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <CardTitle className="text-xl">{card.title}</CardTitle>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors duration-300">{card.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
@@ -127,10 +128,14 @@ export default function Index() {
           <h2 className="font-display text-2xl font-bold">Explore More</h2>
         </div>
         <div className="flex flex-wrap justify-center gap-4">
-          {exploreLinks.map((link) => (
+          {exploreLinks.map((link, index) => (
             <Link key={link.title} to="/auth">
-              <Button variant="outline" className="gap-2">
-                <Sparkles className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                className="gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:scale-105"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <Sparkles className="h-4 w-4 transition-transform hover:rotate-12" />
                 {link.title}
               </Button>
             </Link>
@@ -148,53 +153,53 @@ export default function Index() {
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="flex gap-4 p-6 rounded-xl border bg-card hover:shadow-lg transition-all hover:border-primary/30">
+            <div className="flex gap-4 p-6 rounded-xl border bg-card card-interactive group">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-glow">
                   <BookOpen className="h-5 w-5 text-primary-foreground" />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Personal Journal</h3>
+                <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">Personal Journal</h3>
                 <p className="text-sm text-muted-foreground">
                   Reflect on your day with AI-assisted mood tagging and insights.
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 p-6 rounded-xl border bg-card hover:shadow-lg transition-all hover:border-secondary/30">
+            <div className="flex gap-4 p-6 rounded-xl border bg-card card-interactive group">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-glow-teal">
                   <TrendingUp className="h-5 w-5 text-secondary-foreground" />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Wellness Tracking</h3>
+                <h3 className="font-semibold mb-1 group-hover:text-secondary transition-colors">Wellness Tracking</h3>
                 <p className="text-sm text-muted-foreground">
                   Monitor your mental health journey with visual dashboards.
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 p-6 rounded-xl border bg-card hover:shadow-lg transition-all hover:border-info/30">
+            <div className="flex gap-4 p-6 rounded-xl border bg-card card-interactive group">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-info to-info/70 flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-info to-info/70 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110">
                   <Brain className="h-5 w-5 text-info-foreground" />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Validated Assessments</h3>
+                <h3 className="font-semibold mb-1 group-hover:text-info transition-colors">Validated Assessments</h3>
                 <p className="text-sm text-muted-foreground">
                   PHQ-9 and GAD-7 questionnaires with research-backed scoring.
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 p-6 rounded-xl border bg-card hover:shadow-lg transition-all hover:border-success/30">
+            <div className="flex gap-4 p-6 rounded-xl border bg-card card-interactive group">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success to-success/70 flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success to-success/70 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110">
                   <Shield className="h-5 w-5 text-success-foreground" />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Private & Secure</h3>
+                <h3 className="font-semibold mb-1 group-hover:text-success transition-colors">Private & Secure</h3>
                 <p className="text-sm text-muted-foreground">
                   Your data is encrypted and confidential. You control everything.
                 </p>
@@ -206,7 +211,7 @@ export default function Index() {
 
       {/* CTA Section */}
       <section className="container py-16">
-        <div className="rounded-2xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-8 md:p-12 text-center text-primary-foreground shadow-xl relative overflow-hidden">
+        <div className="rounded-2xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-8 md:p-12 text-center text-primary-foreground shadow-xl relative overflow-hidden hover:shadow-2xl transition-shadow duration-500">
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, white 2px, transparent 2px), radial-gradient(circle at 75% 75%, white 2px, transparent 2px)', backgroundSize: '60px 60px' }} />
           <div className="relative z-10">
             <h2 className="font-display text-2xl font-bold md:text-3xl">
@@ -217,9 +222,9 @@ export default function Index() {
               It's free, confidential, and designed just for you.
             </p>
             <Link to="/auth">
-              <Button size="lg" variant="secondary" className="mt-8 shadow-lg hover:shadow-xl transition-all">
+              <Button size="lg" variant="secondary" className="mt-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 Create Free Account
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
           </div>
@@ -229,8 +234,8 @@ export default function Index() {
       {/* Footer */}
       <footer className="container py-8 border-t">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground group">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
               <Brain className="h-4 w-4 text-primary-foreground" />
             </div>
             <span>© 2025 MindMate. All rights reserved.</span>
