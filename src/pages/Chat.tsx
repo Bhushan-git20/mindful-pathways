@@ -53,7 +53,7 @@ export default function Chat() {
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <ChatInterface />
           </CardContent>
         </Card>
