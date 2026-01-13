@@ -151,7 +151,7 @@ export default function Profile() {
             </Button>
             <div className="flex items-center gap-2">
               <Brain className="h-6 w-6 text-primary" />
-              <span className="text-lg font-semibold font-display">MindfulU</span>
+              <span className="text-lg font-semibold font-display">MindMate</span>
             </div>
           </div>
         </div>

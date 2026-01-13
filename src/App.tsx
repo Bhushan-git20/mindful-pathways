@@ -15,6 +15,8 @@ import History from "./pages/History";
 import Admin from "./pages/Admin";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,10 +36,13 @@ const App = () => (
             <Route path="/journal" element={<Journal />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/trends" element={<Trends />} />
+            <Route path="/insights" element={<Trends />} />
             <Route path="/history" element={<History />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/notifications" element={<Notifications />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
