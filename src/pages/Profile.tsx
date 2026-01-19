@@ -109,12 +109,8 @@ export default function Profile() {
 
     setDeleting(true);
     try {
-      // Delete user data from tables
-      await supabase.from('assessments').delete().eq('user_id', user.id);
-      await supabase.from('journal_entries').delete().eq('user_id', user.id);
-      await supabase.from('risk_scores').delete().eq('user_id', user.id);
-      await supabase.from('profiles').delete().eq('user_id', user.id);
-      await supabase.from('user_roles').delete().eq('user_id', user.id);
+      const { error } = await supabase.rpc('delete_my_account_data');
+      if (error) throw error;
 
       // Sign out
       await signOut();
