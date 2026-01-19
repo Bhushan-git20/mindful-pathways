@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssessmentForm } from "@/components/assessments/AssessmentForm";
 import AppHeader from "@/components/layout/AppHeader";
-import { ArrowLeft, Brain, Heart, AlertTriangle } from "lucide-react";
-
-type AssessmentType = "PHQ-9" | "GAD-7" | null;
+import { ArrowLeft, ClipboardCheck, AlertTriangle } from "lucide-react";
 
 export default function Assessments() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentType>(null);
+  const [showAssessment, setShowAssessment] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -28,25 +26,28 @@ export default function Assessments() {
     );
   }
 
-  if (selectedAssessment) {
+  if (showAssessment) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container max-w-3xl py-8 px-4">
           <Button 
             variant="ghost" 
-            onClick={() => setSelectedAssessment(null)}
+            onClick={() => setShowAssessment(false)}
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Assessments
+            Back
           </Button>
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">
-              {selectedAssessment === "PHQ-9" ? "Depression Screening (PHQ-9)" : "Anxiety Screening (GAD-7)"}
+              Mental Wellness Screening
             </h1>
             <p className="text-muted-foreground mt-2">
-              Answer honestly based on how you've felt over the past 2 weeks.
+              PHQ-9 + GAD-7 Combined Assessment
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Answer based on how you've felt over the past 2 weeks.
             </p>
           </div>
 
@@ -62,10 +63,7 @@ export default function Assessments() {
             </CardContent>
           </Card>
 
-          <AssessmentForm 
-            type={selectedAssessment} 
-            onComplete={() => setSelectedAssessment(null)} 
-          />
+          <AssessmentForm onComplete={() => setShowAssessment(false)} />
         </div>
       </div>
     );
@@ -82,55 +80,48 @@ export default function Assessments() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setSelectedAssessment("PHQ-9")}>
-            <CardHeader>
-              <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                <Brain className="h-6 w-6 text-blue-600" />
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setShowAssessment(true)}>
+          <CardHeader>
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-4 group-hover:from-blue-200 group-hover:to-purple-200 transition-colors">
+              <ClipboardCheck className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>Mental Wellness Screening</CardTitle>
+            <CardDescription>
+              Combined PHQ-9 (Depression) + GAD-7 (Anxiety) assessment — clinically validated tools used worldwide
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="font-medium text-blue-800 text-sm">PHQ-9</p>
+                <p className="text-xs text-blue-600">Depression screening (9 questions)</p>
               </div>
-              <CardTitle>PHQ-9 Depression Screening</CardTitle>
-              <CardDescription>
-                Patient Health Questionnaire - a validated tool to screen for depression symptoms
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 9 questions</li>
-                <li>• Takes about 3-5 minutes</li>
-                <li>• Measures depression severity</li>
-              </ul>
-              <Button className="w-full mt-4">Start PHQ-9</Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setSelectedAssessment("GAD-7")}>
-            <CardHeader>
-              <div className="h-12 w-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                <Heart className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-purple-50 rounded-lg">
+                <p className="font-medium text-purple-800 text-sm">GAD-7</p>
+                <p className="text-xs text-purple-600">Anxiety screening (7 questions)</p>
               </div>
-              <CardTitle>GAD-7 Anxiety Screening</CardTitle>
-              <CardDescription>
-                Generalized Anxiety Disorder scale - a validated tool to screen for anxiety symptoms
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 7 questions</li>
-                <li>• Takes about 2-3 minutes</li>
-                <li>• Measures anxiety severity</li>
-              </ul>
-              <Button className="w-full mt-4">Start GAD-7</Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <ul className="text-sm text-muted-foreground space-y-1 mb-4">
+              <li>• 16 questions total</li>
+              <li>• Takes about 5-7 minutes</li>
+              <li>• Separate scores for depression and anxiety</li>
+              <li>• Overall wellness risk assessment</li>
+            </ul>
+            <Button className="w-full">Start Assessment</Button>
+          </CardContent>
+        </Card>
 
         <Card className="mt-8 bg-muted/50">
           <CardContent className="pt-6">
-            <h3 className="font-semibold mb-2">About These Assessments</h3>
+            <h3 className="font-semibold mb-2">About This Assessment</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              The <strong>PHQ-9</strong> (Patient Health Questionnaire) screens for depression symptoms, 
+              while the <strong>GAD-7</strong> (Generalized Anxiety Disorder scale) screens for anxiety.
+            </p>
             <p className="text-sm text-muted-foreground">
-              The PHQ-9 and GAD-7 are widely used, clinically validated screening tools. 
-              They help identify symptoms but are not a substitute for professional diagnosis. 
-              Your responses are stored securely and can help track changes over time.
+              Both are clinically validated and widely used in healthcare settings. They help identify 
+              symptoms but are not a substitute for professional diagnosis. Your responses are stored 
+              securely and can help track changes over time.
             </p>
           </CardContent>
         </Card>
