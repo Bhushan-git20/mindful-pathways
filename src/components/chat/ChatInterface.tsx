@@ -5,7 +5,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Send, Loader2, Bot, User, AlertTriangle } from "lucide-react";
+import { Send, Loader2, Bot, User, AlertTriangle, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Message {
   id: string;
@@ -14,18 +26,19 @@ interface Message {
   type?: "faq" | "ai" | "crisis" | "error";
 }
 
+const WELCOME_MESSAGE: Message = {
+  id: "welcome",
+  role: "assistant",
+  content: "Hi there! I'm here to support you with mental wellness tips, coping strategies, and campus resources. How are you feeling today?",
+  type: "ai"
+};
+
 export function ChatInterface() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: "Hi there! I'm here to support you with mental wellness tips, coping strategies, and campus resources. How are you feeling today?",
-      type: "ai"
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -145,8 +158,63 @@ export function ChatInterface() {
     }
   };
 
+  const handleClearHistory = async () => {
+    if (!user) return;
+    
+    setIsClearing(true);
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setMessages([WELCOME_MESSAGE]);
+      setHistoryLoaded(false);
+      toast.success('Chat history cleared');
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+      toast.error('Failed to clear chat history');
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const hasHistory = messages.some(m => m.id !== "welcome");
+
   return (
     <div className="flex flex-col h-[600px]">
+      {hasHistory && (
+        <div className="flex justify-end pb-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Clear History
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear chat history?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all your chat messages. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleClearHistory}
+                  disabled={isClearing}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isClearing ? 'Clearing...' : 'Clear History'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
         <div className="space-y-4 pb-4">
           {messages.map((message) => (
