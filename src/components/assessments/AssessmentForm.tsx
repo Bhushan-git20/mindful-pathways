@@ -1,38 +1,37 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { AssessmentQuestion } from "./AssessmentQuestion";
 import { AssessmentResults } from "./AssessmentResults";
 import { 
-  PHQ9_QUESTIONS, 
-  GAD7_QUESTIONS, 
-  getPHQ9Severity, 
-  getGAD7Severity,
-  SeverityBand 
+  COMBINED_QUESTIONS,
+  getCombinedAssessmentResult,
+  getSectionTitle,
+  getQuestionSection,
+  CombinedAssessmentResult
 } from "@/data/assessmentQuestions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Brain, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface AssessmentFormProps {
-  type: "PHQ-9" | "GAD-7";
   onComplete: () => void;
 }
 
-export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
+export function AssessmentForm({ onComplete }: AssessmentFormProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const questions = type === "PHQ-9" ? PHQ9_QUESTIONS : GAD7_QUESTIONS;
-  const maxScore = type === "PHQ-9" ? 27 : 21;
+  const questions = COMBINED_QUESTIONS;
   
   const [responses, setResponses] = useState<(number | null)[]>(new Array(questions.length).fill(null));
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{ score: number; severity: SeverityBand; interpretation: string } | null>(null);
+  const [result, setResult] = useState<CombinedAssessmentResult | null>(null);
 
-  const questionsPerPage = 3;
+  const questionsPerPage = 4;
   const totalPages = Math.ceil(questions.length / questionsPerPage);
   const startIndex = currentStep * questionsPerPage;
   const endIndex = Math.min(startIndex + questionsPerPage, questions.length);
@@ -41,6 +40,10 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
   const allCurrentAnswered = currentQuestions.every((_, i) => responses[startIndex + i] !== null);
   const allAnswered = responses.every(r => r !== null);
   const progress = (responses.filter(r => r !== null).length / questions.length) * 100;
+
+  // Determine current section
+  const currentSection = getQuestionSection(startIndex);
+  const sectionTitle = getSectionTitle(startIndex);
 
   const handleResponseChange = (questionIndex: number, value: number) => {
     const newResponses = [...responses];
@@ -66,24 +69,37 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
     if (!user || !allAnswered) return;
 
     setIsSubmitting(true);
-    const totalScore = responses.reduce((sum, val) => sum + (val || 0), 0);
-    const { band, interpretation } = type === "PHQ-9" 
-      ? getPHQ9Severity(totalScore) 
-      : getGAD7Severity(totalScore);
+    const assessmentResult = getCombinedAssessmentResult(responses);
 
     try {
+      // Save combined assessment
       const { error } = await supabase.from("assessments").insert({
         user_id: user.id,
-        assessment_type: type,
+        assessment_type: "PHQ-9+GAD-7",
         responses: responses,
-        total_score: totalScore,
-        severity: band,
-        interpretation: interpretation
+        total_score: assessmentResult.phq9.score + assessmentResult.gad7.score,
+        severity: assessmentResult.overallRisk === "high" ? "severe" : 
+                  assessmentResult.overallRisk === "medium" ? "moderate" : "minimal",
+        interpretation: assessmentResult.overallInterpretation
       });
 
       if (error) throw error;
 
-      setResult({ score: totalScore, severity: band, interpretation });
+      // Also save to risk_scores for trend tracking
+      await supabase.from("risk_scores").insert({
+        user_id: user.id,
+        overall_risk: assessmentResult.overallRisk,
+        combined_score: assessmentResult.phq9.score + assessmentResult.gad7.score,
+        assessment_component: {
+          phq9_score: assessmentResult.phq9.score,
+          phq9_severity: assessmentResult.phq9.band,
+          gad7_score: assessmentResult.gad7.score,
+          gad7_severity: assessmentResult.gad7.band,
+          suicidal_ideation: assessmentResult.hasSuicidalIdeation
+        }
+      });
+
+      setResult(assessmentResult);
       toast({
         title: "Assessment Completed",
         description: "Your responses have been saved securely."
@@ -103,11 +119,7 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
   if (result) {
     return (
       <AssessmentResults
-        assessmentType={type}
-        score={result.score}
-        maxScore={maxScore}
-        severity={result.severity}
-        interpretation={result.interpretation}
+        result={result}
         onBack={onComplete}
         onViewDashboard={() => navigate("/dashboard")}
       />
@@ -116,6 +128,7 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
 
   return (
     <div className="space-y-6">
+      {/* Progress Section */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Progress</span>
@@ -124,6 +137,31 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
         <Progress value={progress} className="h-2" />
       </div>
 
+      {/* Section Header */}
+      {sectionTitle && (
+        <div className="flex items-center gap-2 py-2 px-3 bg-muted/50 rounded-lg">
+          {currentSection === "depression" ? (
+            <Brain className="h-5 w-5 text-blue-600" />
+          ) : (
+            <Heart className="h-5 w-5 text-purple-600" />
+          )}
+          <span className="font-medium">{sectionTitle}</span>
+          <Badge variant="outline" className={currentSection === "depression" ? "border-blue-200 text-blue-700" : "border-purple-200 text-purple-700"}>
+            {currentSection === "depression" ? "9 questions" : "7 questions"}
+          </Badge>
+        </div>
+      )}
+
+      {/* Current section indicator (when not showing title) */}
+      {!sectionTitle && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className={currentSection === "depression" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}>
+            {currentSection === "depression" ? "Depression (PHQ-9)" : "Anxiety (GAD-7)"}
+          </Badge>
+        </div>
+      )}
+
+      {/* Questions */}
       <div className="space-y-4">
         {currentQuestions.map((question, i) => (
           <AssessmentQuestion
@@ -132,10 +170,12 @@ export function AssessmentForm({ type, onComplete }: AssessmentFormProps) {
             question={question}
             value={responses[startIndex + i]}
             onChange={(value) => handleResponseChange(startIndex + i, value)}
+            variant={getQuestionSection(startIndex + i)}
           />
         ))}
       </div>
 
+      {/* Navigation */}
       <div className="flex justify-between pt-4">
         <Button
           variant="outline"
