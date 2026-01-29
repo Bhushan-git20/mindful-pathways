@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, Info, ArrowLeft, Brain, Heart, Phone } from "lucide-react";
+import { AlertTriangle, CheckCircle, Info, ArrowLeft, Brain, Heart, Phone, Lightbulb } from "lucide-react";
 import { CombinedAssessmentResult, SeverityBand } from "@/data/assessmentQuestions";
 
 interface AssessmentResultsProps {
@@ -48,6 +48,83 @@ const riskConfig = {
   high: { color: "text-red-600", bgColor: "bg-red-100", label: "High Risk" }
 };
 
+// Personalized recommendations based on dominant concern
+const getPersonalizedRecommendations = (
+  phq9Score: number, 
+  gad7Score: number, 
+  phq9MaxScore: number, 
+  gad7MaxScore: number
+) => {
+  // Calculate normalized percentages
+  const depressionPct = (phq9Score / phq9MaxScore) * 100;
+  const anxietyPct = (gad7Score / gad7MaxScore) * 100;
+  
+  const dominantConcern = depressionPct > anxietyPct ? 'depression' : 
+                          anxietyPct > depressionPct ? 'anxiety' : 'balanced';
+  
+  const depressionRecommendations = [
+    "Behavioral activation: Schedule small, enjoyable activities daily (even a 10-minute walk)",
+    "Social connection: Reach out to a friend or family member, even briefly",
+    "Sleep hygiene: Maintain a consistent sleep schedule and limit screens before bed",
+    "Physical activity: Light exercise can boost mood—aim for 20-30 minutes daily",
+    "Mindful gratitude: Write down 3 things you're grateful for each day",
+    "Break tasks into smaller steps to avoid feeling overwhelmed",
+  ];
+  
+  const anxietyRecommendations = [
+    "Deep breathing: Practice 4-7-8 breathing (inhale 4s, hold 7s, exhale 8s)",
+    "Grounding techniques: Use the 5-4-3-2-1 method when feeling anxious",
+    "Limit caffeine: Reduce coffee, energy drinks, and caffeinated sodas",
+    "Progressive muscle relaxation: Tense and release muscle groups systematically",
+    "Worry time: Set aside 15 minutes daily to address worries, then let them go",
+    "Challenge catastrophic thinking: Ask 'What's the evidence? What's most likely?'",
+  ];
+  
+  const balancedRecommendations = [
+    "Establish a daily routine with consistent sleep, meals, and activity",
+    "Practice mindfulness meditation for 10-15 minutes daily",
+    "Regular exercise: Aim for 150 minutes of moderate activity per week",
+    "Limit alcohol and substance use, which can worsen both conditions",
+    "Connect with supportive people—isolation worsens both anxiety and depression",
+    "Consider journaling to track patterns in your mood and worries",
+  ];
+  
+  let primaryRecs: string[];
+  let secondaryRecs: string[];
+  let focusTitle: string;
+  let focusDescription: string;
+  let focusIcon: 'depression' | 'anxiety' | 'balanced';
+  
+  if (dominantConcern === 'depression') {
+    primaryRecs = depressionRecommendations.slice(0, 4);
+    secondaryRecs = anxietyRecommendations.slice(0, 2);
+    focusTitle = "Focus: Managing Low Mood";
+    focusDescription = "Your responses suggest depression symptoms are more prominent. These strategies target mood improvement.";
+    focusIcon = 'depression';
+  } else if (dominantConcern === 'anxiety') {
+    primaryRecs = anxietyRecommendations.slice(0, 4);
+    secondaryRecs = depressionRecommendations.slice(0, 2);
+    focusTitle = "Focus: Managing Anxiety";
+    focusDescription = "Your responses suggest anxiety symptoms are more prominent. These strategies target worry and tension.";
+    focusIcon = 'anxiety';
+  } else {
+    primaryRecs = balancedRecommendations.slice(0, 4);
+    secondaryRecs = [...depressionRecommendations.slice(0, 1), ...anxietyRecommendations.slice(0, 1)];
+    focusTitle = "Balanced Approach";
+    focusDescription = "Your responses show similar levels of depression and anxiety. These strategies address both.";
+    focusIcon = 'balanced';
+  }
+  
+  return {
+    dominantConcern,
+    focusTitle,
+    focusDescription,
+    focusIcon,
+    primaryRecs,
+    secondaryRecs,
+  };
+};
+
 export function AssessmentResults({ 
   result,
   onBack,
@@ -59,6 +136,13 @@ export function AssessmentResults({
   
   const formatSeverity = (band: SeverityBand) => 
     band.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+
+  const recommendations = getPersonalizedRecommendations(
+    result.phq9.score,
+    result.gad7.score,
+    result.phq9.maxScore,
+    result.gad7.maxScore
+  );
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -142,6 +226,43 @@ export function AssessmentResults({
           </CardContent>
         </Card>
       </div>
+
+      {/* Personalized Recommendations */}
+      <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-indigo-600" />
+            <CardTitle className="text-lg text-indigo-900">{recommendations.focusTitle}</CardTitle>
+          </div>
+          <p className="text-sm text-indigo-700 mt-1">{recommendations.focusDescription}</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="font-medium text-indigo-800 mb-2">Primary Strategies:</p>
+            <ul className="space-y-2">
+              {recommendations.primaryRecs.map((rec, idx) => (
+                <li key={idx} className="flex gap-2 text-sm text-indigo-700">
+                  <span className="text-indigo-500 font-bold">•</span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {recommendations.secondaryRecs.length > 0 && (
+            <div>
+              <p className="font-medium text-indigo-800 mb-2">Also Consider:</p>
+              <ul className="space-y-2">
+                {recommendations.secondaryRecs.map((rec, idx) => (
+                  <li key={idx} className="flex gap-2 text-sm text-indigo-600">
+                    <span className="text-indigo-400 font-bold">•</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Disclaimer */}
       <Card className="bg-amber-50 border-amber-200">
