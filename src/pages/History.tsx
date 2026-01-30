@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppHeader from "@/components/layout/AppHeader";
 import { History as HistoryIcon, TrendingUp, TrendingDown, Minus, Calendar, Target, Activity, AlertTriangle, Download } from "lucide-react";
 import { format } from "date-fns";
@@ -19,6 +18,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import type { Json } from "@/integrations/supabase/types";
 
 interface Assessment {
   id: string;
@@ -26,6 +26,8 @@ interface Assessment {
   total_score: number;
   severity: string;
   completed_at: string;
+  responses: Json;
+  interpretation?: string | null;
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -34,6 +36,27 @@ const SEVERITY_COLORS: Record<string, string> = {
   moderate: "bg-orange-100 text-orange-800",
   moderately_severe: "bg-red-100 text-red-800",
   severe: "bg-red-200 text-red-900"
+};
+
+// Helper to extract PHQ-9 and GAD-7 subscores from combined assessment
+const getSubscores = (assessment: Assessment) => {
+  const responses = (typeof assessment.responses === 'object' && assessment.responses !== null && !Array.isArray(assessment.responses)) 
+    ? assessment.responses as Record<string, unknown>
+    : {};
+  let phq9Score = 0;
+  let gad7Score = 0;
+  
+  // PHQ-9 questions are q1-q9, GAD-7 are q10-q16
+  for (let i = 1; i <= 9; i++) {
+    const val = responses[`q${i}`];
+    phq9Score += typeof val === 'number' ? val : 0;
+  }
+  for (let i = 10; i <= 16; i++) {
+    const val = responses[`q${i}`];
+    gad7Score += typeof val === 'number' ? val : 0;
+  }
+  
+  return { phq9Score, gad7Score };
 };
 
 export default function History() {
@@ -93,15 +116,20 @@ export default function History() {
     }, {} as Record<string, number>);
   const primaryStressor = Object.entries(severeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "None detected";
 
-  // Chart data - last 8 assessments
+  // Chart data - last 8 assessments with subscores
   const chartData = [...assessments]
     .reverse()
     .slice(-8)
-    .map(a => ({
-      date: format(new Date(a.completed_at), "MMM d"),
-      score: a.total_score,
-      type: a.assessment_type
-    }));
+    .map(a => {
+      const { phq9Score, gad7Score } = getSubscores(a);
+      return {
+        date: format(new Date(a.completed_at), "MMM d"),
+        score: a.total_score,
+        phq9: phq9Score,
+        gad7: gad7Score,
+        type: a.assessment_type
+      };
+    });
 
   // Determine trend
   const getTrend = (index: number) => {
@@ -208,27 +236,120 @@ export default function History() {
           </Card>
         </div>
 
-        {/* Wellness Score Trend Chart */}
+        {/* Subscale Trend Charts */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-blue-500" />
+                Depression (PHQ-9) Trend
+              </CardTitle>
+              <CardDescription>Score range: 0-27</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" fontSize={12} className="text-muted-foreground" />
+                    <YAxis domain={[0, 27]} fontSize={12} className="text-muted-foreground" />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-card border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium">{data.date}</p>
+                              <p className="text-sm text-blue-600">PHQ-9: {data.phq9}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="phq9" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ fill: "#3b82f6", strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-12">Complete assessments to see your trend</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-purple-500" />
+                Anxiety (GAD-7) Trend
+              </CardTitle>
+              <CardDescription>Score range: 0-21</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" fontSize={12} className="text-muted-foreground" />
+                    <YAxis domain={[0, 21]} fontSize={12} className="text-muted-foreground" />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-card border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium">{data.date}</p>
+                              <p className="text-sm text-purple-600">GAD-7: {data.gad7}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="gad7" 
+                      stroke="#8b5cf6" 
+                      strokeWidth={2}
+                      dot={{ fill: "#8b5cf6", strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-12">Complete assessments to see your trend</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Combined Trend Chart */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Wellness Score Trend</CardTitle>
-            <CardDescription>Your assessment scores over time</CardDescription>
+            <CardTitle>Combined Wellness Trend</CardTitle>
+            <CardDescription>Depression and anxiety scores compared over time</CardDescription>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="date" fontSize={12} />
-                  <YAxis fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="date" fontSize={12} className="text-muted-foreground" />
+                  <YAxis fontSize={12} className="text-muted-foreground" />
                   <Tooltip 
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-card border rounded-lg p-2 shadow-lg">
-                            <p className="font-medium">{data.date}</p>
-                            <p className="text-sm text-muted-foreground">{data.type}: {data.score}</p>
+                          <div className="bg-card border rounded-lg p-3 shadow-lg">
+                            <p className="font-medium mb-2">{data.date}</p>
+                            <p className="text-sm text-blue-600">Depression (PHQ-9): {data.phq9}</p>
+                            <p className="text-sm text-purple-600">Anxiety (GAD-7): {data.gad7}</p>
+                            <p className="text-sm text-muted-foreground mt-1">Total: {data.score}</p>
                           </div>
                         );
                       }
@@ -237,10 +358,19 @@ export default function History() {
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="score" 
-                    stroke="hsl(var(--primary))" 
+                    dataKey="phq9" 
+                    name="Depression"
+                    stroke="#3b82f6" 
                     strokeWidth={2}
-                    dot={{ fill: "hsl(var(--primary))" }}
+                    dot={{ fill: "#3b82f6" }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="gad7" 
+                    name="Anxiety"
+                    stroke="#8b5cf6" 
+                    strokeWidth={2}
+                    dot={{ fill: "#8b5cf6" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -258,47 +388,43 @@ export default function History() {
                 <CardTitle>Past Assessments</CardTitle>
                 <CardDescription>All your completed check-ins</CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filter by type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="PHQ-9">PHQ-9</SelectItem>
-                    <SelectItem value="GAD-7">GAD-7</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-              </div>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {filteredAssessments.length > 0 ? (
+            {assessments.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Risk Level</TableHead>
+                    <TableHead>PHQ-9</TableHead>
+                    <TableHead>GAD-7</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Severity</TableHead>
                     <TableHead>Trend</TableHead>
-                    <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAssessments.map((assessment, index) => {
+                  {assessments.map((assessment, index) => {
                     const trend = getTrend(index);
+                    const { phq9Score, gad7Score } = getSubscores(assessment);
                     return (
                       <TableRow key={assessment.id}>
                         <TableCell className="font-medium">
-                          {format(new Date(assessment.completed_at), "MMM d, yyyy")}
+                          {format(new Date(assessment.completed_at), "MMM d, yyyy 'at' h:mm a")}
                         </TableCell>
-                        <TableCell>{assessment.assessment_type}</TableCell>
-                        <TableCell>{assessment.total_score}</TableCell>
+                        <TableCell>
+                          <span className="text-blue-600 font-medium">{phq9Score}</span>
+                          <span className="text-muted-foreground text-xs">/27</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-purple-600 font-medium">{gad7Score}</span>
+                          <span className="text-muted-foreground text-xs">/21</span>
+                        </TableCell>
+                        <TableCell className="font-semibold">{assessment.total_score}</TableCell>
                         <TableCell>
                           <Badge className={SEVERITY_COLORS[assessment.severity] || "bg-gray-100"}>
                             {assessment.severity.replace("_", " ")}
@@ -320,16 +446,11 @@ export default function History() {
                             )}
                             {trend === "stable" && (
                               <>
-                                <Minus className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm text-gray-500">Stable</span>
+                                <Minus className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">Stable</span>
                               </>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => navigate('/trends')}>
-                            View Details →
-                          </Button>
                         </TableCell>
                       </TableRow>
                     );
