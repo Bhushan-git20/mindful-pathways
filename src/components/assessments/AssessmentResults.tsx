@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, Info, ArrowLeft, Brain, Heart, Phone, Lightbulb } from "lucide-react";
+import { AlertTriangle, CheckCircle, Info, ArrowLeft, Brain, Heart, Phone, Lightbulb, ExternalLink, BookOpen } from "lucide-react";
 import { CombinedAssessmentResult, SeverityBand } from "@/data/assessmentQuestions";
+import { useNavigate } from "react-router-dom";
 
 interface AssessmentResultsProps {
   result: CombinedAssessmentResult;
@@ -88,12 +89,32 @@ const getPersonalizedRecommendations = (
     "Connect with supportive people—isolation worsens both anxiety and depression",
     "Consider journaling to track patterns in your mood and worries",
   ];
+
+  // Resource links based on dominant concern
+  const resourceLinks = {
+    depression: [
+      { label: "Understanding Depression", category: "Educational", search: "depression" },
+      { label: "CBT Techniques", category: "Self-Help", search: "cognitive" },
+      { label: "Physical Activity & Mental Health", category: "Self-Help", search: "exercise" },
+    ],
+    anxiety: [
+      { label: "Understanding Anxiety", category: "Educational", search: "anxiety" },
+      { label: "Grounding Techniques", category: "Coping Strategies", search: "grounding" },
+      { label: "Breathing Exercises", category: "Coping Strategies", search: "breathing" },
+    ],
+    balanced: [
+      { label: "Mindfulness Meditation", category: "Coping Strategies", search: "mindfulness" },
+      { label: "Self-Help Resources", category: "Self-Help", search: "" },
+      { label: "Music & Relaxation", category: "Music & Relaxation", search: "" },
+    ],
+  };
   
   let primaryRecs: string[];
   let secondaryRecs: string[];
   let focusTitle: string;
   let focusDescription: string;
   let focusIcon: 'depression' | 'anxiety' | 'balanced';
+  let relevantResources: typeof resourceLinks.depression;
   
   if (dominantConcern === 'depression') {
     primaryRecs = depressionRecommendations.slice(0, 4);
@@ -101,18 +122,21 @@ const getPersonalizedRecommendations = (
     focusTitle = "Focus: Managing Low Mood";
     focusDescription = "Your responses suggest depression symptoms are more prominent. These strategies target mood improvement.";
     focusIcon = 'depression';
+    relevantResources = resourceLinks.depression;
   } else if (dominantConcern === 'anxiety') {
     primaryRecs = anxietyRecommendations.slice(0, 4);
     secondaryRecs = depressionRecommendations.slice(0, 2);
     focusTitle = "Focus: Managing Anxiety";
     focusDescription = "Your responses suggest anxiety symptoms are more prominent. These strategies target worry and tension.";
     focusIcon = 'anxiety';
+    relevantResources = resourceLinks.anxiety;
   } else {
     primaryRecs = balancedRecommendations.slice(0, 4);
     secondaryRecs = [...depressionRecommendations.slice(0, 1), ...anxietyRecommendations.slice(0, 1)];
     focusTitle = "Balanced Approach";
     focusDescription = "Your responses show similar levels of depression and anxiety. These strategies address both.";
     focusIcon = 'balanced';
+    relevantResources = resourceLinks.balanced;
   }
   
   return {
@@ -122,6 +146,7 @@ const getPersonalizedRecommendations = (
     focusIcon,
     primaryRecs,
     secondaryRecs,
+    relevantResources,
   };
 };
 
@@ -130,6 +155,7 @@ export function AssessmentResults({
   onBack,
   onViewDashboard
 }: AssessmentResultsProps) {
+  const navigate = useNavigate();
   const phq9Config = severityConfig[result.phq9.band];
   const gad7Config = severityConfig[result.gad7.band];
   const overallConfig = riskConfig[result.overallRisk];
@@ -143,6 +169,13 @@ export function AssessmentResults({
     result.phq9.maxScore,
     result.gad7.maxScore
   );
+
+  const navigateToResource = (category: string, search: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (search) params.set('search', search);
+    navigate(`/resources?${params.toString()}`);
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -261,6 +294,28 @@ export function AssessmentResults({
               </ul>
             </div>
           )}
+          
+          {/* Related Resources Links */}
+          <div className="pt-4 border-t border-indigo-200">
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="h-4 w-4 text-indigo-600" />
+              <p className="font-medium text-indigo-800">Explore Related Resources:</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recommendations.relevantResources.map((resource, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateToResource(resource.category, resource.search)}
+                  className="bg-white/80 hover:bg-indigo-100 text-indigo-700 border-indigo-300"
+                >
+                  {resource.label}
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Button>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
