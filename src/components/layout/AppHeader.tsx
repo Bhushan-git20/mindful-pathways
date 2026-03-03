@@ -15,27 +15,23 @@ const navItems = [
   { href: '/chat', label: 'Chatbot', icon: MessageCircle },
   { href: '/history', label: 'History', icon: History },
 ];
+
 export default function AppHeader() {
-  const {
-    user,
-    signOut
-  } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user) return;
-      const {
-        data: adminData
-      } = await supabase.rpc('has_role', {
+      const { data: adminData } = await supabase.rpc('has_role', {
         _user_id: user.id,
         _role: 'admin'
       });
-      const {
-        data: counselorData
-      } = await supabase.rpc('has_role', {
+      const { data: counselorData } = await supabase.rpc('has_role', {
         _user_id: user.id,
         _role: 'counselor'
       });
@@ -43,7 +39,24 @@ export default function AppHeader() {
     };
     checkAdmin();
   }, [user]);
-  return <header className="border-b bg-gradient-to-r from-card via-card to-primary/5 sticky top-0 z-50 backdrop-blur-sm">
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (!user) return;
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_read', false);
+      setUnreadCount(count || 0);
+    };
+    fetchUnreadCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  return (
+    <header className="border-b bg-gradient-to-r from-card via-card to-primary/5 sticky top-0 z-50 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/dashboard')}>
@@ -55,18 +68,43 @@ export default function AppHeader() {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'default' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className={`gap-2 ${location.pathname === item.href ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-primary/10'}`}>
+          {navItems.map(item => (
+            <Button
+              key={item.href}
+              variant={location.pathname === item.href ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => navigate(item.href)}
+              className={`gap-2 ${location.pathname === item.href ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-primary/10'}`}
+            >
               <item.icon className="h-4 w-4" />
               <span className="hidden lg:inline">{item.label}</span>
-            </Button>)}
+            </Button>
+          ))}
         </nav>
 
         {/* User Menu */}
         <div className="flex items-center gap-2">
-          {isAdmin && <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="hidden sm:flex">
+          {/* Notification Bell */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/notifications')}
+            className="relative"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Button>
+
+          {isAdmin && (
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="hidden sm:flex">
               <Shield className="h-4 w-4 mr-2" />
               Admin
-            </Button>}
+            </Button>
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -79,6 +117,11 @@ export default function AppHeader() {
               <DropdownMenuItem onClick={() => navigate('/notifications')}>
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
+                {unreadCount > 0 && (
+                  <span className="ml-auto text-xs bg-destructive text-destructive-foreground rounded-full px-1.5">
+                    {unreadCount}
+                  </span>
+                )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <User className="h-4 w-4 mr-2" />
@@ -88,10 +131,12 @@ export default function AppHeader() {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </DropdownMenuItem>
-              {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin')} className="sm:hidden">
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => navigate('/admin')} className="sm:hidden">
                   <Shield className="h-4 w-4 mr-2" />
                   Admin Panel
-                </DropdownMenuItem>}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive">
                 <LogOut className="h-4 w-4 mr-2" />
@@ -105,10 +150,19 @@ export default function AppHeader() {
       {/* Mobile Navigation */}
       <div className="md:hidden border-t bg-gradient-to-r from-muted/30 to-primary/5 overflow-x-auto">
         <nav className="container flex items-center gap-1 py-2">
-          {navItems.map(item => <Button key={item.href} variant={location.pathname === item.href ? 'default' : 'ghost'} size="sm" onClick={() => navigate(item.href)} className={`flex-shrink-0 ${location.pathname === item.href ? 'bg-primary text-primary-foreground' : ''}`}>
+          {navItems.map(item => (
+            <Button
+              key={item.href}
+              variant={location.pathname === item.href ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => navigate(item.href)}
+              className={`flex-shrink-0 ${location.pathname === item.href ? 'bg-primary text-primary-foreground' : ''}`}
+            >
               <item.icon className="h-4 w-4" />
-            </Button>)}
+            </Button>
+          ))}
         </nav>
       </div>
-    </header>;
+    </header>
+  );
 }

@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Shield, Users, AlertTriangle, TrendingUp, ClipboardList, BookOpen, Eye, Download, CheckCircle, XCircle, Search, BarChart3, UserCog, Trash2 } from 'lucide-react';
+import { Shield, Users, AlertTriangle, TrendingUp, ClipboardList, BookOpen, Eye, Download, CheckCircle, XCircle, Search, BarChart3, UserCog, Trash2, Bell } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -75,6 +75,7 @@ export default function Admin() {
   const [roleChangeOpen, setRoleChangeOpen] = useState(false);
   const [newRole, setNewRole] = useState<AppRole>('student');
   const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [dbNotifications, setDbNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -273,6 +274,20 @@ export default function Admin() {
     if (hasAccess && activeSection === 'students') {
       fetchManagedUsers();
     }
+  }, [hasAccess, activeSection]);
+
+  // Fetch DB notifications for alerts
+  useEffect(() => {
+    const fetchDbNotifications = async () => {
+      if (!hasAccess || activeSection !== 'alerts') return;
+      const { data } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      setDbNotifications(data || []);
+    };
+    fetchDbNotifications();
   }, [hasAccess, activeSection]);
 
   const fetchManagedUsers = async () => {
@@ -914,15 +929,81 @@ export default function Admin() {
     </div>
   );
 
+  const handleMarkNotificationRead = async (id: string) => {
+    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    setDbNotifications(prev => prev.map((n: any) => n.id === id ? { ...n, is_read: true } : n));
+    toast.success('Alert marked as resolved');
+  };
+
   const renderAlerts = () => (
     <div className="space-y-6">
+      {/* DB Risk Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-destructive" />
+            Risk Alert Notifications
+          </CardTitle>
+          <CardDescription>Auto-generated alerts when students score elevated risk levels</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {dbNotifications.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Alert</TableHead>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dbNotifications.map((notif) => (
+                  <TableRow key={notif.id} className={!notif.is_read ? 'bg-destructive/5' : ''}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{notif.title}</p>
+                        <p className="text-sm text-muted-foreground">{notif.message}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={notif.severity === 'critical' ? 'destructive' : notif.severity === 'high' ? 'default' : 'secondary'}>
+                        {notif.severity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">{format(new Date(notif.created_at), 'MMM d, yyyy HH:mm')}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={!notif.is_read ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}>
+                        {notif.is_read ? 'Resolved' : 'Open'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {!notif.is_read && (
+                        <Button variant="ghost" size="sm" onClick={() => handleMarkNotificationRead(notif.id)}>
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Resolve
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No risk alert notifications yet</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Legacy alerts */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Active Alerts
+            Historical Alerts
           </CardTitle>
-          <CardDescription>High-risk cases requiring attention</CardDescription>
+          <CardDescription>High-risk cases from assessments and journals</CardDescription>
         </CardHeader>
         <CardContent>
           {alerts.length > 0 ? (
@@ -934,7 +1015,6 @@ export default function Admin() {
                   <TableHead>Source</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -949,22 +1029,16 @@ export default function Admin() {
                     <TableCell>{alert.source}</TableCell>
                     <TableCell>{alert.date}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={alert.status === 'open' ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}>
+                      <Badge variant="outline" className={alert.status === 'open' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}>
                         {alert.status === 'open' ? 'Open' : 'Resolved'}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Resolve
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-center text-muted-foreground py-12">No active alerts</p>
+            <p className="text-center text-muted-foreground py-8">No active alerts</p>
           )}
         </CardContent>
       </Card>

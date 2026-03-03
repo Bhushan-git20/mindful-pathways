@@ -137,6 +137,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          related_assessment_id: string | null
+          related_user_id: string | null
+          severity: string
+          target_role: Database["public"]["Enums"]["app_role"]
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          related_assessment_id?: string | null
+          related_user_id?: string | null
+          severity?: string
+          target_role?: Database["public"]["Enums"]["app_role"]
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          related_assessment_id?: string | null
+          related_user_id?: string | null
+          severity?: string
+          target_role?: Database["public"]["Enums"]["app_role"]
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
