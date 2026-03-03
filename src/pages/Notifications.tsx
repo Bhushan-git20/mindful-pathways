@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AppHeader from '@/components/layout/AppHeader';
@@ -14,25 +14,41 @@ import {
   BookOpen,
   Sparkles,
   ArrowRight,
-  Clock
+  Clock,
+  CheckCheck
 } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
-interface Notification {
+interface DbNotification {
   id: string;
-  type: 'assessment' | 'insight' | 'recommendation' | 'alert' | 'resource';
+  title: string;
+  message: string;
+  type: string;
+  severity: string;
+  is_read: boolean;
+  created_at: string;
+  related_user_id: string | null;
+  related_assessment_id: string | null;
+  target_role: string;
+}
+
+interface LocalNotification {
+  id: string;
+  type: 'assessment' | 'insight' | 'recommendation' | 'alert' | 'resource' | 'risk_alert';
   title: string;
   message: string;
   timestamp: Date;
   read: boolean;
   actionUrl?: string;
   actionLabel?: string;
+  isDb?: boolean;
 }
 
 export default function Notifications() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<LocalNotification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
 
   useEffect(() => {
@@ -42,13 +58,35 @@ export default function Notifications() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    const generateNotifications = async () => {
+    const fetchNotifications = async () => {
       if (!user) return;
 
-      const notifs: Notification[] = [];
-      const now = new Date();
+      const allNotifs: LocalNotification[] = [];
 
-      // Get latest assessment
+      // Fetch DB notifications (risk alerts for admins/counselors, or student's own)
+      const { data: dbNotifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (dbNotifs) {
+        dbNotifs.forEach((n: DbNotification) => {
+          allNotifs.push({
+            id: n.id,
+            type: n.type as LocalNotification['type'],
+            title: n.title,
+            message: n.message,
+            timestamp: new Date(n.created_at),
+            read: n.is_read,
+            isDb: true,
+            actionUrl: '/admin',
+            actionLabel: 'View in Admin'
+          });
+        });
+      }
+
+      // Also generate local notifications (assessment results, reminders)
       const { data: latestAssessment } = await supabase
         .from('assessments')
         .select('*')
@@ -58,58 +96,21 @@ export default function Notifications() {
         .maybeSingle();
 
       if (latestAssessment) {
-        notifs.push({
+        allNotifs.push({
           id: 'assessment-result',
           type: 'assessment',
           title: 'Assessment Results Ready',
           message: `Your ${latestAssessment.assessment_type} assessment scored ${latestAssessment.total_score}. View your detailed insights.`,
           timestamp: new Date(latestAssessment.completed_at),
-          read: false,
+          read: true,
           actionUrl: '/trends',
           actionLabel: 'View Results'
-        });
-
-        // Add recommendation based on severity
-        if (['moderate', 'moderately_severe', 'severe'].includes(latestAssessment.severity)) {
-          notifs.push({
-            id: 'stress-alert',
-            type: 'alert',
-            title: 'Elevated Stress Detected',
-            message: 'Your recent assessment shows elevated stress levels. Consider exploring our coping strategies and resources.',
-            timestamp: new Date(latestAssessment.completed_at),
-            read: false,
-            actionUrl: '/resources',
-            actionLabel: 'View Resources'
-          });
-        }
-      }
-
-      // Check journal entries for mood patterns
-      const { data: recentJournals } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (recentJournals && recentJournals.length > 0) {
-        const latestJournal = recentJournals[0];
-        notifs.push({
-          id: 'journal-insight',
-          type: 'insight',
-          title: 'Journal Insight Available',
-          message: `Your recent journal entry has been analyzed. ${latestJournal.risk_level === 'low' ? 'You\'re doing great!' : 'We noticed some patterns worth exploring.'}`,
-          timestamp: new Date(latestJournal.created_at),
-          read: false,
-          actionUrl: '/journal',
-          actionLabel: 'View Journal'
         });
       }
 
       // Weekly check-in reminder
-      const lastWeek = new Date(now);
+      const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
-      
       const { count: weeklyAssessments } = await supabase
         .from('assessments')
         .select('*', { count: 'exact', head: true })
@@ -117,47 +118,62 @@ export default function Notifications() {
         .gte('completed_at', lastWeek.toISOString());
 
       if ((weeklyAssessments ?? 0) === 0) {
-        notifs.push({
+        allNotifs.push({
           id: 'weekly-reminder',
           type: 'recommendation',
           title: 'Weekly Check-in Reminder',
-          message: 'It\'s been a week since your last assessment. Regular check-ins help track your progress.',
-          timestamp: now,
+          message: "It's been a week since your last assessment. Regular check-ins help track your progress.",
+          timestamp: new Date(),
           read: false,
           actionUrl: '/assessments',
           actionLabel: 'Take Assessment'
         });
       }
 
-      // Add a general wellness tip
-      notifs.push({
-        id: 'wellness-tip',
-        type: 'resource',
-        title: 'New Resource Added',
-        message: 'Explore our new guided meditation resources for stress relief and better sleep.',
-        timestamp: new Date(now.getTime() - 86400000), // 1 day ago
-        read: true,
-        actionUrl: '/resources',
-        actionLabel: 'Explore'
-      });
-
-      // Sort by timestamp (newest first)
-      notifs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-      setNotifications(notifs);
+      allNotifs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      setNotifications(allNotifs);
       setLoadingNotifications(false);
     };
 
     if (user) {
-      generateNotifications();
+      fetchNotifications();
     }
   }, [user]);
 
-  const getIcon = (type: Notification['type']) => {
+  const markAsRead = async (notifId: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', notifId);
+
+    if (!error) {
+      setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const dbIds = notifications.filter(n => n.isDb && !n.read).map(n => n.id);
+    if (dbIds.length > 0) {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .in('id', dbIds);
+
+      if (error) {
+        toast.error('Failed to mark notifications as read');
+        return;
+      }
+    }
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    toast.success('All notifications marked as read');
+  };
+
+  const getIcon = (type: LocalNotification['type']) => {
     switch (type) {
       case 'assessment':
         return <CheckCircle className="h-5 w-5 text-primary" />;
       case 'alert':
+      case 'risk_alert':
         return <AlertTriangle className="h-5 w-5 text-amber-500" />;
       case 'insight':
         return <TrendingUp className="h-5 w-5 text-info" />;
@@ -170,7 +186,15 @@ export default function Notifications() {
     }
   };
 
-  const getTypeBadge = (type: Notification['type']) => {
+  const getTypeBadge = (type: LocalNotification['type'], severity?: string) => {
+    if (type === 'risk_alert') {
+      const styles: Record<string, string> = {
+        critical: 'bg-rose-500/10 text-rose-600',
+        high: 'bg-orange-500/10 text-orange-600',
+        medium: 'bg-amber-500/10 text-amber-600',
+      };
+      return styles[severity || 'medium'] || 'bg-amber-500/10 text-amber-600';
+    }
     const styles: Record<string, string> = {
       assessment: 'bg-primary/10 text-primary',
       alert: 'bg-amber-500/10 text-amber-600',
@@ -189,16 +213,13 @@ export default function Notifications() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-
       <main className="container py-8 max-w-3xl">
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -208,16 +229,22 @@ export default function Notifications() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold font-display text-foreground">Notifications</h1>
-                <p className="text-sm text-muted-foreground">
-                  Stay updated on your wellness journey
-                </p>
+                <p className="text-sm text-muted-foreground">Stay updated on your wellness journey</p>
               </div>
             </div>
-            {unreadCount > 0 && (
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                {unreadCount} new
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    {unreadCount} new
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1">
+                    <CheckCheck className="h-3 w-3" />
+                    Mark all read
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -255,7 +282,7 @@ export default function Notifications() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold text-foreground">{notification.title}</h3>
                           <Badge variant="outline" className={getTypeBadge(notification.type)}>
-                            {notification.type}
+                            {notification.type === 'risk_alert' ? 'risk alert' : notification.type}
                           </Badge>
                           {!notification.read && (
                             <span className="h-2 w-2 rounded-full bg-primary" />
@@ -269,17 +296,30 @@ export default function Notifications() {
                       <p className="text-sm text-muted-foreground mb-3">
                         {notification.message}
                       </p>
-                      {notification.actionUrl && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(notification.actionUrl!)}
-                          className="gap-2"
-                        >
-                          {notification.actionLabel}
-                          <ArrowRight className="h-3 w-3" />
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {notification.actionUrl && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(notification.actionUrl!)}
+                            className="gap-2"
+                          >
+                            {notification.actionLabel}
+                            <ArrowRight className="h-3 w-3" />
+                          </Button>
+                        )}
+                        {notification.isDb && !notification.read && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => markAsRead(notification.id)}
+                            className="gap-1 text-muted-foreground"
+                          >
+                            <CheckCheck className="h-3 w-3" />
+                            Mark read
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -288,7 +328,6 @@ export default function Notifications() {
           </div>
         )}
 
-        {/* Notification Settings Hint */}
         <Card className="mt-8 bg-muted/50">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
