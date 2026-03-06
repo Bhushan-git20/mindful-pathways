@@ -16,12 +16,13 @@ const CRISIS_RESPONSE = {
   message: `I'm concerned about what you've shared. Your safety matters, and I want to make sure you get the right support.
 
 **If you're in immediate danger, please:**
-- Call 988 (Suicide & Crisis Lifeline)
-- Text HOME to 741741 (Crisis Text Line)
-- Go to your nearest emergency room
-- Contact your campus counseling center
+- Call **9152987821** (iCall Psychosocial Helpline)
+- Call **1860-2662-345** (Vandrevala Foundation – 24/7)
+- Call **080-46110007** (NIMHANS Helpline)
+- Go to your nearest hospital emergency ward
+- Contact your campus counseling centre
 
-You don't have to face this alone. A trained counselor can help you through this moment.
+You don't have to face this alone. A trained counsellor can help you through this moment.
 
 Would you like me to share some campus resources?`
 };
