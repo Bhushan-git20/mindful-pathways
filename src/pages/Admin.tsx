@@ -830,6 +830,16 @@ export default function Admin() {
                             <UserCog className="h-4 w-4" />
                           </Button>
                         )}
+                        {isAdmin && u.user_id !== user?.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => { setSelectedUser(u); setDeleteConfirmOpen(true); }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
