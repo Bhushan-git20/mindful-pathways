@@ -76,6 +76,8 @@ export default function Admin() {
   const [newRole, setNewRole] = useState<AppRole>('student');
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [dbNotifications, setDbNotifications] = useState<any[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
