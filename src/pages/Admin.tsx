@@ -76,6 +76,8 @@ export default function Admin() {
   const [newRole, setNewRole] = useState<AppRole>('student');
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [dbNotifications, setDbNotifications] = useState<any[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -406,6 +408,34 @@ export default function Admin() {
       fetchManagedUsers();
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove role');
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser || !isAdmin) return;
+    if (selectedUser.user_id === user?.id) {
+      toast.error('Cannot delete your own account');
+      return;
+    }
+
+    setDeletingUser(true);
+    try {
+      const { error } = await supabase.rpc('admin_delete_user_data', {
+        _target_user_id: selectedUser.user_id,
+      });
+
+      if (error) throw error;
+
+      toast.success('User data deleted successfully');
+      setDeleteConfirmOpen(false);
+      setUserDetailOpen(false);
+      setSelectedUser(null);
+      fetchManagedUsers();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast.error(error.message || 'Failed to delete user');
+    } finally {
+      setDeletingUser(false);
     }
   };
 
@@ -800,6 +830,16 @@ export default function Admin() {
                             <UserCog className="h-4 w-4" />
                           </Button>
                         )}
+                        {isAdmin && u.user_id !== user?.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => { setSelectedUser(u); setDeleteConfirmOpen(true); }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -923,6 +963,24 @@ export default function Admin() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRoleChangeOpen(false)}>Cancel</Button>
             <Button onClick={handleRoleChange}>Add Role</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all data for <strong>{selectedUser?.full_name || selectedUser?.email}</strong>? This will permanently remove their profile, assessments, journal entries, chat messages, and all associated data. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} disabled={deletingUser}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteUser} disabled={deletingUser}>
+              {deletingUser ? 'Deleting...' : 'Delete User'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
