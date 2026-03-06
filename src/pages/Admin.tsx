@@ -411,6 +411,34 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!selectedUser || !isAdmin) return;
+    if (selectedUser.user_id === user?.id) {
+      toast.error('Cannot delete your own account');
+      return;
+    }
+
+    setDeletingUser(true);
+    try {
+      const { error } = await supabase.rpc('admin_delete_user_data', {
+        _target_user_id: selectedUser.user_id,
+      });
+
+      if (error) throw error;
+
+      toast.success('User data deleted successfully');
+      setDeleteConfirmOpen(false);
+      setUserDetailOpen(false);
+      setSelectedUser(null);
+      fetchManagedUsers();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast.error(error.message || 'Failed to delete user');
+    } finally {
+      setDeletingUser(false);
+    }
+  };
+
   const getRoleBadgeVariant = (role: AppRole) => {
     switch (role) {
       case 'admin': return 'destructive';
