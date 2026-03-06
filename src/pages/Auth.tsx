@@ -85,7 +85,7 @@ export default function Auth() {
           <div className="mt-8 max-w-sm text-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <div className="rounded-lg border border-border/50 bg-card/50 p-4 transition-all duration-300 hover:border-primary/30 hover:shadow-sm">
               <p className="text-xs text-muted-foreground">
-                <strong>Important:</strong> This platform is a screening and self-help tool, not a diagnostic service or replacement for professional mental health care. If you're in crisis, please contact emergency services or a crisis helpline immediately.
+                <strong>Important:</strong> This platform is a screening and self-help tool, not a diagnostic service or replacement for professional mental health care. If you're in crisis, please call iCall at 9152987821 or Vandrevala Foundation at 1860-2662-345.
               </p>
             </div>
           </div>
