@@ -966,6 +966,24 @@ export default function Admin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all data for <strong>{selectedUser?.full_name || selectedUser?.email}</strong>? This will permanently remove their profile, assessments, journal entries, chat messages, and all associated data. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} disabled={deletingUser}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteUser} disabled={deletingUser}>
+              {deletingUser ? 'Deleting...' : 'Delete User'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
