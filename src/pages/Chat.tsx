@@ -46,7 +46,7 @@ export default function Chat() {
               <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-amber-800">
                 This is an AI assistant for wellness support, not a substitute for professional help. 
-                In crisis? Call 988 or text HOME to 741741.
+                In crisis? Call iCall at 9152987821 or Vandrevala Foundation at 1860-2662-345.
               </p>
             </div>
           </CardContent>

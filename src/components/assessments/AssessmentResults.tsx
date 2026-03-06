@@ -192,9 +192,10 @@ export function AssessmentResults({
                 </p>
                 <div className="mt-3 space-y-2">
                   <p className="font-semibold text-red-800">Crisis Resources:</p>
-                  <p className="text-red-700">• <strong>988</strong> - Suicide & Crisis Lifeline (call or text)</p>
-                  <p className="text-red-700">• <strong>741741</strong> - Crisis Text Line (text HOME)</p>
-                  <p className="text-red-700">• Campus Counseling Center - available during business hours</p>
+                  <p className="text-red-700">• <strong>9152987821</strong> - iCall Psychosocial Helpline</p>
+                  <p className="text-red-700">• <strong>1860-2662-345</strong> - Vandrevala Foundation (24/7)</p>
+                  <p className="text-red-700">• <strong>080-46110007</strong> - NIMHANS Helpline</p>
+                  <p className="text-red-700">• Campus Counselling Centre - available during college hours</p>
                 </div>
               </div>
             </div>
