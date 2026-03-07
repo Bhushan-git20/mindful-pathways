@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, ArrowRight, TrendingUp, Library, MessageCircle, Sparkles, BookOpen, Shield } from 'lucide-react';
+import { Brain, ArrowRight, TrendingUp, Library, MessageCircle, Sparkles, BookOpen, Shield, Sun, Moon } from 'lucide-react';
 
 export default function Index() {
   const { user, loading } = useAuth();
