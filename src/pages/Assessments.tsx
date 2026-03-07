@@ -82,7 +82,7 @@ export default function Assessments() {
 
         <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setShowAssessment(true)}>
           <CardHeader>
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-4 group-hover:from-blue-200 group-hover:to-purple-200 transition-colors">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-info/20 to-primary/20 flex items-center justify-center mb-4 group-hover:from-info/30 group-hover:to-primary/30 transition-colors">
               <ClipboardCheck className="h-6 w-6 text-primary" />
             </div>
             <CardTitle>Mental Wellness Screening</CardTitle>

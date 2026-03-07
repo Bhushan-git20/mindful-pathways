@@ -31,11 +31,11 @@ interface Assessment {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  minimal: "bg-green-100 text-green-800",
-  mild: "bg-yellow-100 text-yellow-800",
-  moderate: "bg-orange-100 text-orange-800",
-  moderately_severe: "bg-red-100 text-red-800",
-  severe: "bg-red-200 text-red-900"
+  minimal: "bg-severity-minimal/15 text-severity-minimal",
+  mild: "bg-severity-mild/15 text-severity-mild",
+  moderate: "bg-severity-moderate/15 text-severity-moderate",
+  moderately_severe: "bg-severity-moderately-severe/15 text-severity-moderately-severe",
+  severe: "bg-severity-severe/15 text-severity-severe"
 };
 
 // Helper to extract PHQ-9 and GAD-7 subscores from combined assessment
