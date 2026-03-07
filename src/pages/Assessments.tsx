@@ -51,11 +51,11 @@ export default function Assessments() {
             </p>
           </div>
 
-          <Card className="mb-6 bg-amber-50 border-amber-200">
+          <Card className="mb-6 bg-warning/10 border-warning/30">
             <CardContent className="pt-6">
               <div className="flex gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                <p className="text-sm text-amber-800">
+                <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                <p className="text-sm text-foreground/80">
                   This is a screening tool, not a diagnosis. Results are confidential and meant to help you understand your mental health. 
                   Always consult a professional for clinical advice.
                 </p>
