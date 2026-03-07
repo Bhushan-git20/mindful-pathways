@@ -9,6 +9,7 @@ import { Brain, ArrowRight, TrendingUp, Library, MessageCircle, Sparkles, BookOp
 export default function Index() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && user) {
