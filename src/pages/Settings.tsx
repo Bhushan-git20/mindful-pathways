@@ -305,8 +305,8 @@ export default function Settings() {
                 </p>
               </div>
               <Select
-                value={preferences.theme}
-                onValueChange={(value: 'light' | 'dark' | 'system') => setPreferences({ ...preferences, theme: value })}
+                value={theme || 'system'}
+                onValueChange={(value) => setTheme(value)}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue />

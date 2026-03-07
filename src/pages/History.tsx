@@ -151,9 +151,9 @@ export default function History() {
 
   const getRiskColor = () => {
     const risk = getRiskLevel();
-    if (risk === "High") return "text-red-600";
-    if (risk === "Moderate") return "text-yellow-600";
-    return "text-green-600";
+    if (risk === "High") return "text-destructive";
+    if (risk === "Moderate") return "text-warning";
+    return "text-success";
   };
 
   if (loading || isLoading) {
