@@ -92,13 +92,13 @@ export default function Assessments() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="font-medium text-blue-800 text-sm">PHQ-9</p>
-                <p className="text-xs text-blue-600">Depression screening (9 questions)</p>
+              <div className="p-3 bg-info/10 rounded-lg">
+                <p className="font-medium text-info text-sm">PHQ-9</p>
+                <p className="text-xs text-info/80">Depression screening (9 questions)</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-lg">
-                <p className="font-medium text-purple-800 text-sm">GAD-7</p>
-                <p className="text-xs text-purple-600">Anxiety screening (7 questions)</p>
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <p className="font-medium text-primary text-sm">GAD-7</p>
+                <p className="text-xs text-primary/80">Anxiety screening (7 questions)</p>
               </div>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1 mb-4">
