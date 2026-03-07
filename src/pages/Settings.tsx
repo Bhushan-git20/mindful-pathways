@@ -44,6 +44,7 @@ interface UserPreferences {
 }
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [preferences, setPreferences] = useState<UserPreferences>({
