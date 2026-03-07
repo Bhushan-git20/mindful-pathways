@@ -75,11 +75,11 @@ export default function Journal() {
           </p>
         </div>
 
-        <Card className="mb-6 bg-amber-50 border-amber-200">
+        <Card className="mb-6 bg-warning/10 border-warning/30">
           <CardContent className="pt-6">
             <div className="flex gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-              <p className="text-sm text-amber-800">
+              <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+              <p className="text-sm text-foreground/80">
                 Your journal entries are analyzed to help identify patterns and provide support. 
                 This is a self-help tool, not therapy. If you need immediate help, please contact a counselor or call 988.
               </p>

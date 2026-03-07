@@ -40,11 +40,11 @@ export default function Chat() {
           </div>
         </div>
 
-        <Card className="mb-4 bg-amber-50 border-amber-200">
+        <Card className="mb-4 bg-warning/10 border-warning/30">
           <CardContent className="py-3">
             <div className="flex gap-2 items-start">
-              <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-amber-800">
+              <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-foreground/80">
                 This is an AI assistant for wellness support, not a substitute for professional help. 
                 In crisis? Call iCall at 9152987821 or Vandrevala Foundation at 1860-2662-345.
               </p>

@@ -1,7 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History, Bell } from 'lucide-react';
+import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History, Bell, Sun, Moon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +21,7 @@ export default function AppHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
@@ -50,13 +52,12 @@ export default function AppHeader() {
       setUnreadCount(count || 0);
     };
     fetchUnreadCount();
-    // Refresh every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
   return (
-    <header className="border-b bg-gradient-to-r from-card via-card to-primary/5 sticky top-0 z-50 backdrop-blur-sm">
+    <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/dashboard')}>
@@ -84,6 +85,18 @@ export default function AppHeader() {
 
         {/* User Menu */}
         <div className="flex items-center gap-2">
+          {/* Dark Mode Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="h-9 w-9"
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
           {/* Notification Bell */}
           <Button
             variant="ghost"
@@ -148,7 +161,7 @@ export default function AppHeader() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t bg-gradient-to-r from-muted/30 to-primary/5 overflow-x-auto">
+      <div className="md:hidden border-t bg-card/50 overflow-x-auto">
         <nav className="container flex items-center gap-1 py-2">
           {navItems.map(item => (
             <Button

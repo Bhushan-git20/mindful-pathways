@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,7 @@ interface UserPreferences {
 }
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [preferences, setPreferences] = useState<UserPreferences>({
@@ -303,8 +305,8 @@ export default function Settings() {
                 </p>
               </div>
               <Select
-                value={preferences.theme}
-                onValueChange={(value: 'light' | 'dark' | 'system') => setPreferences({ ...preferences, theme: value })}
+                value={theme || 'system'}
+                onValueChange={(value) => setTheme(value)}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue />

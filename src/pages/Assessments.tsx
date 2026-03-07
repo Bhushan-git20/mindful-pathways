@@ -51,11 +51,11 @@ export default function Assessments() {
             </p>
           </div>
 
-          <Card className="mb-6 bg-amber-50 border-amber-200">
+          <Card className="mb-6 bg-warning/10 border-warning/30">
             <CardContent className="pt-6">
               <div className="flex gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                <p className="text-sm text-amber-800">
+                <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                <p className="text-sm text-foreground/80">
                   This is a screening tool, not a diagnosis. Results are confidential and meant to help you understand your mental health. 
                   Always consult a professional for clinical advice.
                 </p>
@@ -82,7 +82,7 @@ export default function Assessments() {
 
         <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setShowAssessment(true)}>
           <CardHeader>
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-4 group-hover:from-blue-200 group-hover:to-purple-200 transition-colors">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-info/20 to-primary/20 flex items-center justify-center mb-4 group-hover:from-info/30 group-hover:to-primary/30 transition-colors">
               <ClipboardCheck className="h-6 w-6 text-primary" />
             </div>
             <CardTitle>Mental Wellness Screening</CardTitle>
@@ -92,13 +92,13 @@ export default function Assessments() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="font-medium text-blue-800 text-sm">PHQ-9</p>
-                <p className="text-xs text-blue-600">Depression screening (9 questions)</p>
+              <div className="p-3 bg-info/10 rounded-lg">
+                <p className="font-medium text-info text-sm">PHQ-9</p>
+                <p className="text-xs text-info/80">Depression screening (9 questions)</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-lg">
-                <p className="font-medium text-purple-800 text-sm">GAD-7</p>
-                <p className="text-xs text-purple-600">Anxiety screening (7 questions)</p>
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <p className="font-medium text-primary text-sm">GAD-7</p>
+                <p className="text-xs text-primary/80">Anxiety screening (7 questions)</p>
               </div>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1 mb-4">
