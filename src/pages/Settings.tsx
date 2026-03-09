@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppHeader from '@/components/layout/AppHeader';
+import PageShell from '@/components/layout/PageShell';
 import { 
   Settings as SettingsIcon, 
   Bell, 
