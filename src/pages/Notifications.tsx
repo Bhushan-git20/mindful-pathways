@@ -218,9 +218,7 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <main className="container py-8 max-w-3xl">
+    <PageShell maxWidth="md">
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
