@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { JournalEditor } from "@/components/journal/JournalEditor";
 import { JournalList } from "@/components/journal/JournalList";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
