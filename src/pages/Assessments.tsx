@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssessmentForm } from "@/components/assessments/AssessmentForm";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { ArrowLeft, ClipboardCheck, AlertTriangle } from "lucide-react";
 
 export default function Assessments() {
