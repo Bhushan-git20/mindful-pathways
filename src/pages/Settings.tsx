@@ -191,10 +191,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-
-      <main className="container py-8 max-w-2xl">
+    <PageShell maxWidth="sm">
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
