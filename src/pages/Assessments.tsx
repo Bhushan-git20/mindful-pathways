@@ -70,9 +70,7 @@ export default function Assessments() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="container max-w-4xl py-8 px-4">
+    <PageShell maxWidth="lg">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Self-Assessments</h1>
           <p className="text-muted-foreground mt-2">
