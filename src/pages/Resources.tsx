@@ -535,7 +535,6 @@ export default function Resources() {
             please contact emergency services or a crisis helpline immediately.
           </p>
         </div>
-      </main>
-    </div>
+    </PageShell>
   );
 }

@@ -539,7 +539,6 @@ export default function Trends() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }
