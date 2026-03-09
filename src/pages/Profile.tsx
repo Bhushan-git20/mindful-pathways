@@ -136,9 +136,13 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
+        <div className="absolute -top-[30%] -left-[15%] h-[70vh] w-[70vh] rounded-full bg-primary/[0.04] blur-[120px] dark:bg-primary/[0.06]" />
+        <div className="absolute -bottom-[20%] -right-[10%] h-[60vh] w-[60vh] rounded-full bg-secondary/[0.05] blur-[100px] dark:bg-secondary/[0.07]" />
+      </div>
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
@@ -154,7 +158,7 @@ export default function Profile() {
       </header>
 
       {/* Main Content */}
-      <main className="container py-8 max-w-2xl">
+      <main className="container py-10 max-w-2xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-display text-foreground">Profile Settings</h1>
           <p className="mt-2 text-muted-foreground">

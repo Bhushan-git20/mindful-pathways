@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import AppHeader from '@/components/layout/AppHeader';
+import PageShell from '@/components/layout/PageShell';
 import WellnessStreak from '@/components/dashboard/WellnessStreak';
 import AnimatedCard from '@/components/dashboard/AnimatedCard';
 import { 
@@ -352,11 +352,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
-      <AppHeader />
-
-      <motion.main 
-        className="container py-8 space-y-8"
+    <PageShell>
+      <motion.div 
+        className="space-y-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -685,7 +683,7 @@ export default function Dashboard() {
           MindMate is a wellness monitoring tool and is not a substitute for professional mental health services. 
           If you're experiencing a crisis, please contact emergency services or a mental health professional.
         </motion.p>
-      </motion.main>
-    </div>
+      </motion.div>
+    </PageShell>
   );
 }

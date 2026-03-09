@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { TrendingUp, Brain, Heart, BookOpen, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -220,9 +220,7 @@ export default function Trends() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="container max-w-6xl py-8 px-4">
+    <PageShell maxWidth="xl">
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -541,7 +539,6 @@ export default function Trends() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }

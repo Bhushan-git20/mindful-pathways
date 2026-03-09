@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import AppHeader from '@/components/layout/AppHeader';
+import PageShell from '@/components/layout/PageShell';
 import { 
   Bell, 
   CheckCircle, 
@@ -218,9 +218,7 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <main className="container py-8 max-w-3xl">
+    <PageShell maxWidth="md">
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -341,7 +339,6 @@ export default function Notifications() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageShell>
   );
 }

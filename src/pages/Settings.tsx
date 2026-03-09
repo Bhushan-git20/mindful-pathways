@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppHeader from '@/components/layout/AppHeader';
+import PageShell from '@/components/layout/PageShell';
 import { 
   Settings as SettingsIcon, 
   Bell, 
@@ -191,10 +191,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-
-      <main className="container py-8 max-w-2xl">
+    <PageShell maxWidth="sm">
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -429,7 +426,6 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageShell>
   );
 }

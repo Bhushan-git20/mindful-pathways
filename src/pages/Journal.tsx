@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { JournalEditor } from "@/components/journal/JournalEditor";
 import { JournalList } from "@/components/journal/JournalList";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -65,9 +65,7 @@ export default function Journal() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="container max-w-4xl py-8 px-4">
+    <PageShell maxWidth="lg">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">My Journal</h1>
           <p className="text-muted-foreground mt-2">
@@ -91,7 +89,6 @@ export default function Journal() {
           <JournalEditor onSave={fetchEntries} />
           <JournalList entries={entries} isLoading={isLoading} />
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { History as HistoryIcon, TrendingUp, TrendingDown, Minus, Calendar, Target, Activity, AlertTriangle, Download } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -165,9 +165,7 @@ export default function History() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="container max-w-6xl py-8 px-4">
+    <PageShell maxWidth="xl">
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -474,7 +472,6 @@ export default function History() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppHeader from '@/components/layout/AppHeader';
+import PageShell from '@/components/layout/PageShell';
 import { 
   ExternalLink, Phone, Heart, 
   BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play, Search, X
@@ -366,11 +366,7 @@ export default function Resources() {
   const displayCategories = categories.length > 0 ? categories : [...new Set(defaultResources.map((r) => r.category))];
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-
-      {/* Main Content */}
-      <main className="container py-8">
+    <PageShell>
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-display text-foreground">Mental Health Resources</h1>
           <p className="mt-2 text-muted-foreground">
@@ -539,7 +535,6 @@ export default function Resources() {
             please contact emergency services or a crisis helpline immediately.
           </p>
         </div>
-      </main>
-    </div>
+    </PageShell>
   );
 }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { AlertTriangle, MessageCircle } from "lucide-react";
 
 export default function Chat() {
@@ -25,9 +25,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="container max-w-3xl py-8 px-4">
+    <PageShell maxWidth="md">
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -57,7 +55,6 @@ export default function Chat() {
             <ChatInterface />
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }
