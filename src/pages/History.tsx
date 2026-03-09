@@ -472,7 +472,6 @@ export default function History() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }
