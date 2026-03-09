@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
-import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import { AlertTriangle, MessageCircle } from "lucide-react";
 
 export default function Chat() {
