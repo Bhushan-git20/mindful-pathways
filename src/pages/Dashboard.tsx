@@ -352,11 +352,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
-      <AppHeader />
-
-      <motion.main 
-        className="container py-8 space-y-8"
+    <PageShell>
+      <motion.div 
+        className="space-y-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
