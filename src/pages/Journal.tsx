@@ -89,7 +89,6 @@ export default function Journal() {
           <JournalEditor onSave={fetchEntries} />
           <JournalList entries={entries} isLoading={isLoading} />
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

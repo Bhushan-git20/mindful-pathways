@@ -366,11 +366,7 @@ export default function Resources() {
   const displayCategories = categories.length > 0 ? categories : [...new Set(defaultResources.map((r) => r.category))];
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-
-      {/* Main Content */}
-      <main className="container py-8">
+    <PageShell>
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-display text-foreground">Mental Health Resources</h1>
           <p className="mt-2 text-muted-foreground">

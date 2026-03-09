@@ -55,7 +55,6 @@ export default function Chat() {
             <ChatInterface />
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }

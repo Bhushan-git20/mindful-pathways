@@ -123,7 +123,6 @@ export default function Assessments() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 }

@@ -339,7 +339,6 @@ export default function Notifications() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageShell>
   );
 }

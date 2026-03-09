@@ -683,7 +683,7 @@ export default function Dashboard() {
           MindMate is a wellness monitoring tool and is not a substitute for professional mental health services. 
           If you're experiencing a crisis, please contact emergency services or a mental health professional.
         </motion.p>
-      </motion.main>
-    </div>
+      </motion.div>
+    </PageShell>
   );
 }

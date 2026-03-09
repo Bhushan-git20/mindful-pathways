@@ -426,7 +426,6 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageShell>
   );
 }
