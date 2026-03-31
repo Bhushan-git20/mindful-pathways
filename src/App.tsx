@@ -20,6 +20,10 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
+import Breathing from "./pages/Breathing";
+import Habits from "./pages/Habits";
+import Community from "./pages/Community";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -42,6 +46,9 @@ const App = () => (
               <Route path="/history" element={<History />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/resources" element={<Resources />} />
+              <Route path="/breathing" element={<Breathing />} />
+              <Route path="/habits" element={<Habits />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />

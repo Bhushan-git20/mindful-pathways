@@ -2,19 +2,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History, Bell, Sun, Moon } from 'lucide-react';
+import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History, Bell, Sun, Moon, Target, Users, Wind } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
-  { href: '/assessments', label: 'Self-Assessment', icon: ClipboardList },
-  { href: '/trends', label: 'Insights', icon: TrendingUp },
+  { href: '/community', label: 'Community', icon: Users },
   { href: '/journal', label: 'Journal', icon: BookOpen },
-  { href: '/resources', label: 'Resources', icon: Library },
-  { href: '/chat', label: 'Chatbot', icon: MessageCircle },
-  { href: '/history', label: 'History', icon: History },
+  { href: '/habits', label: 'Habits', icon: Target },
+  { href: '/resources', label: 'Library', icon: Library },
+  { href: '/breathing', label: 'Breathe', icon: Wind },
+  { href: '/chat', label: 'AI Chat', icon: MessageCircle },
+  { href: '/trends', label: 'Trends', icon: TrendingUp },
+  { href: '/assessments', label: 'Tests', icon: ClipboardList },
 ];
 
 export default function AppHeader() {

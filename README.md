@@ -60,9 +60,29 @@
 - Privacy controls
 
 ### 🛡️ Admin Panel
-- User management
-- Platform-wide analytics
-- Chatbot FAQ management
+- User management and platform-wide analytics
+- **Resource Management** — Full CRUD (Create, Read, Update, Delete) for educational materials
+- Engagement monitoring and risk alerts
+
+### 🧘 Guided Breathing
+- Interactive breathing exercises (Box Breathing, 4-7-8, Deep Calm)
+- Visual-led animations for inhalation, holding, and exhalation
+- Progress session tracking
+
+### 🎯 Habit Tracking
+- Daily habit builder with visual 7-day progress grid
+- Streak counting and consistency analysis
+- Healthy habit suggestions (Meditation, Journaling, etc.)
+
+### 🤝 Community Support
+- Anonymous peer-to-peer support feed
+- Positive mood tagging (Gratitude, Progress, Support)
+- Safe space guidelines and moderation-ready design
+
+### 🎨 Mood-Coded Journaling
+- Journal entries color-coded by AI-detected sentiment
+- Visual calendar of emotional states
+- Detailed reflection cards with mood-based aesthetics
 
 ---
 
@@ -149,6 +169,9 @@ mindful-pathways/
 │   │   ├── Chat.tsx
 │   │   ├── Trends.tsx
 │   │   ├── Resources.tsx
+│   │   ├── Breathing.tsx
+│   │   ├── Habits.tsx
+│   │   ├── Community.tsx
 │   │   ├── History.tsx
 │   │   ├── Profile.tsx
 │   │   ├── Settings.tsx

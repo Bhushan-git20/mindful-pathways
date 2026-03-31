@@ -3,15 +3,17 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageShell from '@/components/layout/PageShell';
 import { 
   ExternalLink, Phone, Heart, 
-  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play, Search, X
+  BookOpen, Users, AlertTriangle, Shield, Sparkles, Music, Play, Search, X, Info
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+
+import { toast } from 'sonner';
 
 // Helper to extract YouTube video ID from URL
 const getYouTubeVideoId = (url: string | null): string | null => {
@@ -45,10 +47,89 @@ const categoryIcons: Record<string, React.ElementType> = {
   'Music & Relaxation': Music,
 };
 
+// Default emergency resources if none in database
+const defaultEmergencyResources = [
+  {
+    id: 'crisis-1',
+    title: 'iCall Psychosocial Helpline',
+    description: 'Call 9152987821 for counselling support',
+    content: 'Professional psychosocial support by TISS, Mumbai. Available Mon–Sat, 8 AM – 10 PM.',
+    category: 'Crisis Support',
+    external_url: 'https://icallhelpline.org/',
+    is_emergency: true,
+    risk_band_target: null,
+  },
+  {
+    id: 'crisis-2',
+    title: 'Vandrevala Foundation Helpline',
+    description: 'Call 1860-2662-345 (24/7)',
+    content: 'Free, 24/7 mental health support in multiple Indian languages.',
+    category: 'Crisis Support',
+    external_url: 'https://www.vandrevalafoundation.com/',
+    is_emergency: true,
+    risk_band_target: null,
+  },
+  {
+    id: 'crisis-3',
+    title: 'NIMHANS Helpline',
+    description: 'Call 080-46110007',
+    content: 'National Institute of Mental Health and Neurosciences helpline for mental health assistance.',
+    category: 'Crisis Support',
+    external_url: 'https://nimhans.ac.in/',
+    is_emergency: true,
+    risk_band_target: null,
+  },
+];
+
+// Default helpful resources if none in database
+const defaultResources = [
+  {
+    id: 'self-1',
+    title: 'Breathing Exercises',
+    description: 'Simple techniques for immediate calm',
+    content: 'Try the 4-7-8 technique: Inhale for 4 seconds, hold for 7 seconds, exhale for 8 seconds. Repeat 3-4 times.',
+    category: 'Coping Strategies',
+    external_url: 'https://www.healthline.com/health/breathing-exercises-for-anxiety',
+    is_emergency: false,
+    risk_band_target: null,
+  },
+  {
+    id: 'self-2',
+    title: 'Grounding Techniques',
+    description: '5-4-3-2-1 sensory method',
+    content: 'Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.',
+    category: 'Coping Strategies',
+    external_url: 'https://www.healthline.com/health/grounding-techniques',
+    is_emergency: false,
+    risk_band_target: null,
+  },
+  {
+    id: 'music-1',
+    title: 'Relaxing Piano Music',
+    description: 'Calming piano melodies for stress relief',
+    content: '3 hours of beautiful piano music to help you relax, study, or sleep peacefully.',
+    category: 'Music & Relaxation',
+    external_url: 'https://www.youtube.com/watch?v=77ZozI0rw7w',
+    is_emergency: false,
+    risk_band_target: null,
+  },
+  {
+    id: 'edu-1',
+    title: 'Understanding Anxiety',
+    description: 'Learn about anxiety and its effects',
+    content: 'Anxiety is a normal response to stress. Learn to recognize symptoms and develop healthy coping strategies.',
+    category: 'Educational',
+    external_url: 'https://nimhans.ac.in/patient-care/',
+    is_emergency: false,
+    risk_band_target: null,
+  },
+];
+
 export default function Resources() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loadingResources, setLoadingResources] = useState(true);
   
@@ -58,6 +139,33 @@ export default function Resources() {
   
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  // Apply search filter
+  const searchFilter = (resource: Resource) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      resource.title.toLowerCase().includes(query) ||
+      (resource.description?.toLowerCase().includes(query)) ||
+      (resource.content?.toLowerCase().includes(query)) ||
+      resource.category.toLowerCase().includes(query)
+    );
+  };
+  
+  // Load bookmarks
+  useEffect(() => {
+    const saved = localStorage.getItem('mindmate_bookmarks');
+    if (saved) setBookmarkedIds(JSON.parse(saved));
+  }, []);
+
+  const toggleBookmark = (id: string) => {
+    const updated = bookmarkedIds.includes(id) 
+      ? bookmarkedIds.filter(bid => bid !== id)
+      : [...bookmarkedIds, id];
+    setBookmarkedIds(updated);
+    localStorage.setItem('mindmate_bookmarks', JSON.stringify(updated));
+    toast.success(bookmarkedIds.includes(id) ? 'Removed from bookmarks' : 'Added to bookmarks!');
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -108,290 +216,75 @@ export default function Resources() {
 
   const emergencyResources = resources.filter((r) => r.is_emergency);
   const categories = [...new Set(resources.filter((r) => !r.is_emergency).map((r) => r.category))];
+  
+  const allAvailableResources = resources.length > 0 ? resources.filter((r) => !r.is_emergency) : defaultResources;
+  
   const filteredResources =
     activeCategory === 'all'
-      ? resources.filter((r) => !r.is_emergency)
-      : resources.filter((r) => !r.is_emergency && r.category === activeCategory);
-
-  // Default emergency resources if none in database
-  const defaultEmergencyResources = [
-    {
-      id: 'crisis-1',
-      title: 'iCall Psychosocial Helpline',
-      description: 'Call 9152987821 for counselling support',
-      content: 'Professional psychosocial support by TISS, Mumbai. Available Mon–Sat, 8 AM – 10 PM.',
-      category: 'Crisis Support',
-      external_url: 'https://icallhelpline.org/',
-      is_emergency: true,
-      risk_band_target: null,
-    },
-    {
-      id: 'crisis-2',
-      title: 'Vandrevala Foundation Helpline',
-      description: 'Call 1860-2662-345 (24/7)',
-      content: 'Free, 24/7 mental health support in multiple Indian languages.',
-      category: 'Crisis Support',
-      external_url: 'https://www.vandrevalafoundation.com/',
-      is_emergency: true,
-      risk_band_target: null,
-    },
-    {
-      id: 'crisis-3',
-      title: 'NIMHANS Helpline',
-      description: 'Call 080-46110007',
-      content: 'National Institute of Mental Health and Neurosciences helpline for mental health assistance.',
-      category: 'Crisis Support',
-      external_url: 'https://nimhans.ac.in/',
-      is_emergency: true,
-      risk_band_target: null,
-    },
-  ];
+      ? allAvailableResources
+      : allAvailableResources.filter((r) => r.category === activeCategory);
 
   const displayEmergencyResources = emergencyResources.length > 0 ? emergencyResources : defaultEmergencyResources;
-
-  // Default helpful resources if none in database
-  const defaultResources = [
-    // Coping Strategies
-    {
-      id: 'self-1',
-      title: 'Breathing Exercises',
-      description: 'Simple techniques for immediate calm',
-      content: 'Try the 4-7-8 technique: Inhale for 4 seconds, hold for 7 seconds, exhale for 8 seconds. Repeat 3-4 times.',
-      category: 'Coping Strategies',
-      external_url: 'https://www.healthline.com/health/breathing-exercises-for-anxiety',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'self-2',
-      title: 'Grounding Techniques',
-      description: '5-4-3-2-1 sensory method',
-      content: 'Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.',
-      category: 'Coping Strategies',
-      external_url: 'https://www.healthline.com/health/grounding-techniques',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'self-3',
-      title: 'Mindfulness Meditation Guide',
-      description: 'Free guided meditations for beginners',
-      content: 'Learn mindfulness techniques to reduce stress and improve focus with step-by-step guides.',
-      category: 'Coping Strategies',
-      external_url: 'https://www.mindful.org/how-to-meditate/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    // Educational
-    {
-      id: 'edu-1',
-      title: 'Understanding Anxiety',
-      description: 'Learn about anxiety and its effects',
-      content: 'Anxiety is a normal response to stress. Learn to recognize symptoms and develop healthy coping strategies.',
-      category: 'Educational',
-      external_url: 'https://nimhans.ac.in/patient-care/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'edu-2',
-      title: 'Understanding Depression',
-      description: 'Learn about depression symptoms and treatment',
-      content: 'Depression is more than feeling sad. It is a treatable condition that affects how you think, feel, and function.',
-      category: 'Educational',
-      external_url: 'https://www.thelivelovelaughfoundation.org/about-mental-health',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'edu-3',
-      title: 'The Live Love Laugh Foundation',
-      description: 'Mental health awareness and resources for India',
-      content: 'Access information, screening tools, and resources for mental health conditions in the Indian context.',
-      category: 'Educational',
-      external_url: 'https://www.thelivelovelaughfoundation.org/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    // Self-Help - Research-backed techniques
-    {
-      id: 'help-1',
-      title: 'Cognitive Behavioral Therapy Techniques',
-      description: 'Evidence-based CBT strategies',
-      content: 'Research-proven CBT techniques for managing anxiety, depression, and negative thought patterns.',
-      category: 'Self-Help',
-      external_url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3584580/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'help-2',
-      title: 'Mindfulness-Based Stress Reduction',
-      description: 'MBSR research and practice guide',
-      content: 'Peer-reviewed research on mindfulness meditation for stress reduction and mental health improvement.',
-      category: 'Self-Help',
-      external_url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3679190/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'help-3',
-      title: 'Physical Exercise & Mental Health',
-      description: 'Research on exercise benefits',
-      content: 'Scientific evidence showing how physical activity reduces symptoms of depression and anxiety.',
-      category: 'Self-Help',
-      external_url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1470658/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'help-4',
-      title: 'Sleep Hygiene Guidelines',
-      description: 'Evidence-based sleep improvement',
-      content: 'Research-backed techniques for improving sleep quality and its impact on mental wellness.',
-      category: 'Self-Help',
-      external_url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6281147/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'help-5',
-      title: 'Journaling for Mental Health',
-      description: 'Expressive writing research',
-      content: 'Studies showing therapeutic benefits of journaling and expressive writing for emotional processing.',
-      category: 'Self-Help',
-      external_url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3830620/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    // Professional Help
-    {
-      id: 'pro-1',
-      title: 'NIMHANS Directory',
-      description: 'Find mental health professionals in India',
-      content: 'National Institute of Mental Health and Neurosciences – leading mental health institution in India.',
-      category: 'Professional Help',
-      external_url: 'https://nimhans.ac.in/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'pro-2',
-      title: 'Practo – Mental Health',
-      description: 'Book online therapy sessions',
-      content: 'Find verified psychiatrists and psychologists near you. Book online or in-person consultations.',
-      category: 'Professional Help',
-      external_url: 'https://www.practo.com/counselling-psychology',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'pro-3',
-      title: 'MindPeers',
-      description: 'Affordable online therapy in India',
-      content: 'Affordable therapy sessions with licensed Indian psychologists via video calls.',
-      category: 'Professional Help',
-      external_url: 'https://www.mindpeers.co/',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    // Music & Relaxation - YouTube Links
-    {
-      id: 'music-1',
-      title: 'Relaxing Piano Music',
-      description: 'Calming piano melodies for stress relief',
-      content: '3 hours of beautiful piano music to help you relax, study, or sleep peacefully.',
-      category: 'Music & Relaxation',
-      external_url: 'https://www.youtube.com/watch?v=77ZozI0rw7w',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'music-2',
-      title: 'Nature Sounds & Meditation',
-      description: 'Forest sounds and peaceful nature ambience',
-      content: 'Immerse yourself in calming nature sounds perfect for meditation, relaxation, or background ambience.',
-      category: 'Music & Relaxation',
-      external_url: 'https://www.youtube.com/watch?v=eKFTSSKCzWA',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'music-3',
-      title: 'Lofi Hip Hop Radio',
-      description: 'Chill beats for studying and relaxation',
-      content: '24/7 live stream of relaxing lo-fi beats perfect for studying, working, or unwinding.',
-      category: 'Music & Relaxation',
-      external_url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'music-4',
-      title: 'Guided Sleep Meditation',
-      description: 'Fall asleep faster with guided relaxation',
-      content: 'Soothing voice guides you through a peaceful journey to help you drift into restful sleep.',
-      category: 'Music & Relaxation',
-      external_url: 'https://www.youtube.com/watch?v=aEqlQvczMJQ',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-    {
-      id: 'music-5',
-      title: 'Anxiety Relief Music',
-      description: 'Calming frequencies for anxiety reduction',
-      content: 'Specially designed music with calming frequencies to help reduce anxiety and promote relaxation.',
-      category: 'Music & Relaxation',
-      external_url: 'https://www.youtube.com/watch?v=lFcSrYw-ARY',
-      is_emergency: false,
-      risk_band_target: null,
-    },
-  ];
-
-  // Apply search filter
-  const searchFilter = (resource: Resource) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      resource.title.toLowerCase().includes(query) ||
-      (resource.description?.toLowerCase().includes(query)) ||
-      (resource.content?.toLowerCase().includes(query)) ||
-      resource.category.toLowerCase().includes(query)
-    );
-  };
-
-  const displayResources = (filteredResources.length > 0 ? filteredResources : defaultResources.filter(
-    (r) => activeCategory === 'all' || r.category === activeCategory
-  )).filter(searchFilter);
+  const displayResources = filteredResources.filter(searchFilter);
   const displayCategories = categories.length > 0 ? categories : [...new Set(defaultResources.map((r) => r.category))];
+
+  const bookmarkedResources = allAvailableResources.filter(r => bookmarkedIds.includes(r.id));
 
   return (
     <PageShell>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold font-display text-foreground">Mental Health Resources</h1>
-          <p className="mt-2 text-muted-foreground">
-            Curated resources to support your mental wellness journey
-          </p>
-          
-          {/* Search Bar */}
-          <div className="relative mt-4 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search resources by topic, keyword..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold font-display text-foreground">Mental Health Resources</h1>
+            <p className="mt-2 text-muted-foreground">
+              Curated resources to support your mental wellness journey
+            </p>
           </div>
+          
+          <div className="flex flex-wrap gap-3">
+             <Button 
+                variant="outline" 
+                className="gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
+                onClick={() => navigate('/breathing')}
+              >
+                <Sparkles className="h-4 w-4" />
+                Try Breathing Exercise
+              </Button>
+          </div>
+        </div>
+
+        {/* Search & Saved Quick Access */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          <div className="md:col-span-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search resources by topic, keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 h-12 text-base"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          <Card className="bg-muted/30 border-dashed">
+            <CardContent className="p-4 flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                 <Heart className={`h-5 w-5 ${bookmarkedIds.length > 0 ? 'text-rose-500 fill-rose-500' : 'text-muted-foreground'}`} />
+                 <span className="text-sm font-medium">{bookmarkedIds.length} Saved Items</span>
+               </div>
+               {bookmarkedIds.length > 0 && (
+                 <Button variant="link" size="sm" onClick={() => setActiveCategory('Saved')} className="h-auto p-0">View all</Button>
+               )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Emergency Resources Banner */}
@@ -401,28 +294,30 @@ export default function Resources() {
               <AlertTriangle className="h-5 w-5" />
               Crisis Resources - Available 24/7
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-destructive/80">
               If you're in crisis or having thoughts of self-harm, please reach out immediately
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
               {displayEmergencyResources.map((resource) => (
-                <Card key={resource.id} className="border-destructive/30">
+                <Card key={resource.id} className="border-destructive/20 hover:border-destructive/40 transition-colors bg-background/50">
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
-                      <Phone className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                      <div className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                        <Phone className="h-4 w-4 text-destructive" />
+                      </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-sm">{resource.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{resource.description}</p>
+                        <h3 className="font-bold text-sm tracking-tight">{resource.title}</h3>
+                        <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{resource.description}</p>
                         {resource.external_url && (
                           <a
                             href={resource.external_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive hover:underline mt-2"
                           >
-                            Visit Website <ExternalLink className="h-3 w-3" />
+                            CALL NOW <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
                       </div>
@@ -436,36 +331,59 @@ export default function Resources() {
 
         {/* Resource Categories */}
         <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="mb-6 flex-wrap h-auto gap-2">
-            <TabsTrigger value="all">All Resources</TabsTrigger>
-            {displayCategories.map((category) => (
-              <TabsTrigger key={category} value={category}>
-                {category}
+          <div className="flex items-center justify-between mb-6 overflow-x-auto pb-2 scrollbar-none">
+            <TabsList className="bg-transparent h-auto gap-2 p-0">
+              <TabsTrigger 
+                value="all" 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full border px-4 py-1.5"
+              >
+                All
               </TabsTrigger>
-            ))}
-          </TabsList>
+              {bookmarkedIds.length > 0 && (
+                <TabsTrigger 
+                  value="Saved" 
+                  className="data-[state=active]:bg-rose-500 data-[state=active]:text-white rounded-full border px-4 py-1.5 gap-2"
+                >
+                  <Heart className="h-3.5 w-3.5 fill-current" /> Saved
+                </TabsTrigger>
+              )}
+              {displayCategories.map((category) => (
+                <TabsTrigger 
+                  key={category} 
+                  value={category}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full border px-4 py-1.5"
+                >
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
-          <TabsContent value={activeCategory}>
+          <TabsContent value={activeCategory} className="mt-0">
             {loadingResources ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-pulse text-muted-foreground">Loading resources...</div>
+              <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-muted-foreground font-medium">Loading library...</p>
+                </div>
               </div>
             ) : (
-              <div className={`grid gap-4 ${
+              <div className={`grid gap-6 ${
                 activeCategory === 'Music & Relaxation' 
                   ? 'md:grid-cols-1 lg:grid-cols-2' 
                   : 'md:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {displayResources.map((resource) => {
+                {(activeCategory === 'Saved' ? bookmarkedResources : displayResources).map((resource) => {
                   const IconComponent = categoryIcons[resource.category] || BookOpen;
                   const isMusic = resource.category === 'Music & Relaxation';
                   const videoId = isMusic ? getYouTubeVideoId(resource.external_url) : null;
+                  const isBookmarked = bookmarkedIds.includes(resource.id);
                   
                   return (
-                    <Card key={resource.id} className="hover:shadow-md transition-shadow overflow-hidden">
+                    <Card key={resource.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-muted flex flex-col h-full">
                       {/* Embedded YouTube Player for Music */}
                       {isMusic && videoId && (
-                        <div className="aspect-video w-full bg-muted">
+                        <div className="aspect-video w-full bg-muted relative group">
                           <iframe
                             src={`https://www.youtube.com/embed/${videoId}`}
                             title={resource.title}
@@ -475,33 +393,47 @@ export default function Resources() {
                           />
                         </div>
                       )}
-                      <CardHeader className="pb-2">
+                      
+                      <CardHeader className="pb-2 relative">
                         <div className="flex items-start justify-between">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <IconComponent className="h-5 w-5 text-primary" />
                           </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {resource.category}
-                          </Badge>
+                          <div className="flex gap-2">
+                             <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className={`h-8 w-8 rounded-full ${isBookmarked ? 'text-rose-500 hover:text-rose-600' : 'text-muted-foreground hover:text-rose-500'}`}
+                              onClick={() => toggleBookmark(resource.id)}
+                            >
+                               <Heart className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                            </Button>
+                            <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
+                              {resource.category}
+                            </Badge>
+                          </div>
                         </div>
-                        <CardTitle className="text-lg mt-3">{resource.title}</CardTitle>
+                        <CardTitle className="text-lg mt-4 group-hover:text-primary transition-colors">{resource.title}</CardTitle>
                         {resource.description && (
-                          <CardDescription>{resource.description}</CardDescription>
+                          <CardDescription className="line-clamp-2 text-xs">{resource.description}</CardDescription>
                         )}
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="flex-grow pt-0">
                         {resource.content && (
-                          <p className="text-sm text-muted-foreground mb-4">{resource.content}</p>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">{resource.content}</p>
                         )}
+                      </CardContent>
+                      <CardFooter className="pt-0 pb-6">
                         {resource.external_url && !isMusic && (
                           <a
                             href={resource.external_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="w-full"
                           >
-                            <Button variant="outline" size="sm" className="w-full">
-                              Learn More
-                              <ExternalLink className="h-4 w-4 ml-2" />
+                            <Button variant="outline" size="sm" className="w-full rounded-full group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                              Read Article
+                              <ExternalLink className="h-3.5 w-3.5 ml-2" />
                             </Button>
                           </a>
                         )}
@@ -510,29 +442,42 @@ export default function Resources() {
                             href={resource.external_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="w-full"
                           >
-                            <Button variant="outline" size="sm" className="w-full">
-                              <Play className="h-4 w-4 mr-2" />
-                              Open in YouTube
-                              <ExternalLink className="h-4 w-4 ml-2" />
+                            <Button variant="outline" size="sm" className="w-full rounded-full group-hover:bg-red-500 group-hover:text-white transition-all group-hover:border-red-500">
+                              <Play className="h-3.5 w-3.5 mr-2 fill-current" />
+                              Watch on YouTube
                             </Button>
                           </a>
                         )}
-                      </CardContent>
+                      </CardFooter>
                     </Card>
                   );
                 })}
+              </div>
+            )}
+            
+            {!loadingResources && activeCategory === 'Saved' && bookmarkedResources.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                 <Heart className="h-16 w-16 text-muted-foreground/20 mb-4" />
+                 <h3 className="text-xl font-bold">No saved items yet</h3>
+                 <p className="text-muted-foreground max-w-xs mt-2">
+                   Click the heart icon on any resource to save it here for quick access later.
+                 </p>
               </div>
             )}
           </TabsContent>
         </Tabs>
 
         {/* Disclaimer */}
-        <div className="mt-8 rounded-lg border bg-muted/30 p-4">
-          <p className="text-xs text-muted-foreground text-center">
-            <strong>Note:</strong> These resources are for informational purposes only and do not
-            replace professional mental health care. If you're experiencing a mental health crisis,
-            please contact emergency services or a crisis helpline immediately.
+        <div className="mt-12 rounded-2xl border bg-muted/30 p-6 flex items-start gap-4">
+          <Info className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <strong>Disclaimer:</strong> The resources provided on MindMate are for educational and self-help purposes only. 
+            They are not intended to be a substitute for professional medical advice, diagnosis, or treatment. 
+            Always seek the advice of your physician or other qualified health provider with any questions you may have 
+            regarding a medical condition. Never disregard professional medical advice or delay in seeking it 
+            because of something you have read on this platform.
           </p>
         </div>
     </PageShell>

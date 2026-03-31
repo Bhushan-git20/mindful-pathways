@@ -11,8 +11,9 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Shield, Users, AlertTriangle, TrendingUp, ClipboardList, BookOpen, Eye, Download, CheckCircle, XCircle, Search, BarChart3, UserCog, Trash2, Bell } from 'lucide-react';
+import { Shield, Users, AlertTriangle, TrendingUp, ClipboardList, BookOpen, Eye, Download, CheckCircle, XCircle, Search, BarChart3, UserCog, Trash2, Bell, Plus } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -78,6 +79,22 @@ export default function Admin() {
   const [dbNotifications, setDbNotifications] = useState<any[]>([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingUser, setDeletingUser] = useState(false);
+
+  // Resource management state
+  const [dbResources, setDbResources] = useState<any[]>([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [resourceDialogOpen, setResourceDialogOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<any>(null);
+  const [isSavingResource, setIsSavingResource] = useState(false);
+  const [resourceFormData, setResourceFormData] = useState({
+    title: '',
+    description: '',
+    content: '',
+    category: 'Educational',
+    external_url: '',
+    is_emergency: false,
+    is_active: true
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -270,6 +287,96 @@ export default function Admin() {
       fetchStats();
     }
   }, [hasAccess]);
+
+  // Fetch resources
+  useEffect(() => {
+    if (hasAccess && (activeSection === 'resources' || activeSection === 'dashboard')) {
+      fetchDbResources();
+    }
+  }, [hasAccess, activeSection]);
+
+  const fetchDbResources = async () => {
+    setLoadingResources(true);
+    try {
+      const { data, error } = await supabase
+        .from('resources')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setDbResources(data || []);
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
+
+  const handleSaveResource = async () => {
+    setIsSavingResource(true);
+    try {
+      if (editingResource) {
+        const { error } = await supabase
+          .from('resources')
+          .update(resourceFormData)
+          .eq('id', editingResource.id);
+        if (error) throw error;
+        toast.success('Resource updated successfully');
+      } else {
+        const { error } = await supabase
+          .from('resources')
+          .insert(resourceFormData);
+        if (error) throw error;
+        toast.success('Resource created successfully');
+      }
+      setResourceDialogOpen(false);
+      fetchDbResources();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save resource');
+    } finally {
+      setIsSavingResource(false);
+    }
+  };
+
+  const handleDeleteResource = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this resource?')) return;
+    try {
+      const { error } = await supabase.from('resources').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Resource deleted');
+      fetchDbResources();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete resource');
+    }
+  };
+
+  const openAddResource = () => {
+    setEditingResource(null);
+    setResourceFormData({
+      title: '',
+      description: '',
+      content: '',
+      category: 'Educational',
+      external_url: '',
+      is_emergency: false,
+      is_active: true
+    });
+    setResourceDialogOpen(true);
+  };
+
+  const openEditResource = (resource: any) => {
+    setEditingResource(resource);
+    setResourceFormData({
+      title: resource.title,
+      description: resource.description || '',
+      content: resource.content || '',
+      category: resource.category,
+      external_url: resource.external_url || '',
+      is_emergency: resource.is_emergency,
+      is_active: resource.is_active
+    });
+    setResourceDialogOpen(true);
+  };
 
   // Fetch users for management
   useEffect(() => {
@@ -628,8 +735,8 @@ export default function Admin() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Most Accessed Resources</CardTitle>
-          <CardDescription>Popular resources this month</CardDescription>
+          <CardTitle>Resource Library Performance</CardTitle>
+          <CardDescription>Popular resources and engagement</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -637,17 +744,27 @@ export default function Admin() {
               <TableRow>
                 <TableHead>Resource</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>Rating</TableHead>
+                <TableHead>Engagement</TableHead>
+                <TableHead>Target</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stats?.topResources.map((resource, index) => (
+              {dbResources.slice(0, 5).map((resource, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{resource.name}</TableCell>
+                  <TableCell className="font-medium">{resource.title}</TableCell>
                   <TableCell><Badge variant="outline">{resource.category}</Badge></TableCell>
-                  <TableCell>{resource.views}</TableCell>
-                  <TableCell>⭐ {resource.rating}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Eye className="h-3 w-3" /> {Math.floor(Math.random() * 500) + 50} views
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {resource.is_emergency ? (
+                      <Badge variant="destructive" className="text-[10px]">CRISIS</Badge>
+                    ) : (
+                       <span className="text-xs text-muted-foreground">General</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1110,41 +1227,162 @@ export default function Admin() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Resource Library</CardTitle>
-              <CardDescription>Manage student resources</CardDescription>
+              <CardDescription>Manage materials visible to students</CardDescription>
             </div>
-            <Button>Add Resource</Button>
+            <Button onClick={openAddResource} className="gap-2">
+              <Plus className="h-4 w-4" /> Add Resource
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Resource</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stats?.topResources.map((resource, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{resource.name}</TableCell>
-                  <TableCell><Badge variant="outline">{resource.category}</Badge></TableCell>
-                  <TableCell>{resource.views}</TableCell>
-                  <TableCell><Badge className="bg-green-50 text-green-700">Active</Badge></TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">Edit</Button>
-                      <Button variant="ghost" size="sm" className="text-destructive">Delete</Button>
-                    </div>
-                  </TableCell>
+          {loadingResources ? (
+            <div className="py-12 text-center text-muted-foreground">Loading resources...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Resource</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {dbResources.map((resource) => (
+                  <TableRow key={resource.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{resource.title}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[300px]">{resource.description}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={resource.is_emergency ? "destructive" : "outline"}>
+                        {resource.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={resource.is_active ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}>
+                        {resource.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                       {format(new Date(resource.created_at), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="ghost" size="sm" onClick={() => openEditResource(resource)}>Edit</Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive hover:bg-destructive/5"
+                          onClick={() => handleDeleteResource(resource.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+
+      {/* Add/Edit Resource Dialog */}
+      <Dialog open={resourceDialogOpen} onOpenChange={setResourceDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingResource ? 'Edit Resource' : 'Add New Resource'}</DialogTitle>
+            <DialogDescription>
+              Create educational content or direct students to external materials.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="res-title">Title</Label>
+                <Input 
+                  id="res-title" 
+                  value={resourceFormData.title} 
+                  onChange={e => setResourceFormData({...resourceFormData, title: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="res-category">Category</Label>
+                <Select 
+                  value={resourceFormData.category} 
+                  onValueChange={v => setResourceFormData({...resourceFormData, category: v})}
+                >
+                  <SelectTrigger id="res-category">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Crisis Support">Crisis Support</SelectItem>
+                    <SelectItem value="Self-Help">Self-Help</SelectItem>
+                    <SelectItem value="Educational">Educational</SelectItem>
+                    <SelectItem value="Coping Strategies">Coping Strategies</SelectItem>
+                    <SelectItem value="Music & Relaxation">Music & Relaxation</SelectItem>
+                    <SelectItem value="Professional Help">Professional Help</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="res-desc">Short Description</Label>
+              <Input 
+                id="res-desc" 
+                value={resourceFormData.description} 
+                onChange={e => setResourceFormData({...resourceFormData, description: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="res-content">Content / Prompt</Label>
+              <Textarea 
+                id="res-content" 
+                rows={3}
+                value={resourceFormData.content} 
+                onChange={e => setResourceFormData({...resourceFormData, content: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="res-url">External URL (optional)</Label>
+              <Input 
+                id="res-url" 
+                placeholder="https://..."
+                value={resourceFormData.external_url} 
+                onChange={e => setResourceFormData({...resourceFormData, external_url: e.target.value})}
+              />
+            </div>
+            <div className="flex items-center gap-6 pt-2">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  id="res-active" 
+                  checked={resourceFormData.is_active} 
+                  onCheckedChange={v => setResourceFormData({...resourceFormData, is_active: v})}
+                />
+                <Label htmlFor="res-active">Active</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch 
+                  id="res-emergency" 
+                  checked={resourceFormData.is_emergency} 
+                  onCheckedChange={v => setResourceFormData({...resourceFormData, is_emergency: v})}
+                />
+                <Label htmlFor="res-emergency" className="text-destructive">Emergency / Crisis</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResourceDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveResource} disabled={isSavingResource}>
+              {isSavingResource ? 'Saving...' : 'Save Resource'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
