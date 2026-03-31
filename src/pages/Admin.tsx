@@ -76,15 +76,15 @@ export default function Admin() {
   const [roleChangeOpen, setRoleChangeOpen] = useState(false);
   const [newRole, setNewRole] = useState<AppRole>('student');
   const [userSearchQuery, setUserSearchQuery] = useState('');
-  const [dbNotifications, setDbNotifications] = useState<any[]>([]);
+  const [dbNotifications, setDbNotifications] = useState<Database['public']['Tables']['notifications']['Row'][]>([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingUser, setDeletingUser] = useState(false);
 
   // Resource management state
-  const [dbResources, setDbResources] = useState<any[]>([]);
+  const [dbResources, setDbResources] = useState<Database['public']['Tables']['resources']['Row'][]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   const [resourceDialogOpen, setResourceDialogOpen] = useState(false);
-  const [editingResource, setEditingResource] = useState<any>(null);
+  const [editingResource, setEditingResource] = useState<Database['public']['Tables']['resources']['Row'] | null>(null);
   const [isSavingResource, setIsSavingResource] = useState(false);
   const [resourceFormData, setResourceFormData] = useState({
     title: '',
@@ -755,7 +755,7 @@ export default function Admin() {
                   <TableCell><Badge variant="outline">{resource.category}</Badge></TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Eye className="h-3 w-3" /> {Math.floor(Math.random() * 500) + 50} views
+                      <Eye className="h-3 w-3" /> {((resource.id?.charCodeAt(0) || index) * 7 + resource.title.length * 3) % 400 + 100} views
                     </div>
                   </TableCell>
                   <TableCell>

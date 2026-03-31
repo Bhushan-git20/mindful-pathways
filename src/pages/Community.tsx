@@ -34,18 +34,31 @@ export default function Community() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      const saved = localStorage.getItem('mindmate_community');
-      if (saved) {
-        setPosts(JSON.parse(saved));
-      } else {
+    // Simulate loading data with cleanup
+    const timer = setTimeout(() => {
+      try {
+        const saved = localStorage.getItem('mindmate_community');
+        if (saved) {
+          setPosts(JSON.parse(saved));
+        } else {
+          setPosts(SAMPLE_POSTS);
+          localStorage.setItem('mindmate_community', JSON.stringify(SAMPLE_POSTS));
+        }
+      } catch (error) {
+        console.error("Failed to parse community posts:", error);
         setPosts(SAMPLE_POSTS);
         localStorage.setItem('mindmate_community', JSON.stringify(SAMPLE_POSTS));
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }, 800);
+
+    return () => clearTimeout(timer);
   }, []);
+
+  const handleReport = () => {
+    toast.info("Reporting feature coming soon. Our moderators are currently monitoring the feed manually.");
+  };
 
   const handleCreatePost = () => {
     if (!newPostContent.trim()) return;
@@ -201,7 +214,14 @@ export default function Community() {
                           {post.likes}
                         </button>
                       </div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                      <div 
+                        role="button"
+                        tabIndex={0}
+                        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded px-1"
+                        onClick={handleReport}
+                        onKeyDown={(e) => e.key === 'Enter' && handleReport()}
+                        aria-label="Report post"
+                      >
                         <AlertTriangle className="h-3 w-3" />
                         <span className="text-[10px] font-medium uppercase tracking-tight">Report</span>
                       </div>

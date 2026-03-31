@@ -373,7 +373,7 @@ export default function Resources() {
                   ? 'md:grid-cols-1 lg:grid-cols-2' 
                   : 'md:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {(activeCategory === 'Saved' ? bookmarkedResources : displayResources).map((resource) => {
+                {(activeCategory === 'Saved' ? bookmarkedResources.filter(searchFilter) : displayResources).map((resource) => {
                   const IconComponent = categoryIcons[resource.category] || BookOpen;
                   const isMusic = resource.category === 'Music & Relaxation';
                   const videoId = isMusic ? getYouTubeVideoId(resource.external_url) : null;

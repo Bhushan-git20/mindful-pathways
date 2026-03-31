@@ -51,7 +51,8 @@ export default function Breathing() {
       setBreathingState('exhale');
       setTimeLeft(activeTechnique.durations.exhale);
     } else if (breathingState === 'exhale') {
-      if (currentCycle < cycles) {
+      // Allow cycles to complete - if cycles is 4, we run 0,1,2,3
+      if (currentCycle < cycles - 1) {
         setBreathingState('inhale');
         setTimeLeft(activeTechnique.durations.inhale);
         setCurrentCycle(prev => prev + 1);
@@ -80,7 +81,7 @@ export default function Breathing() {
     setIsPlaying(true);
     setBreathingState('inhale');
     setTimeLeft(activeTechnique.durations.inhale);
-    setCurrentCycle(1);
+    setCurrentCycle(0); // Start at 0 for proper indexing
   };
 
   const resetBreathing = () => {
@@ -201,7 +202,7 @@ export default function Breathing() {
                   <div 
                     key={i} 
                     className={`h-2 w-2 rounded-full transition-colors duration-500 ${
-                      i < currentCycle ? 'bg-primary' : 'bg-muted'
+                      i <= currentCycle && breathingState !== 'finished' ? 'bg-primary' : 'bg-muted'
                     }`}
                   />
                 ))}
@@ -244,7 +245,7 @@ export default function Breathing() {
 
               {breathingState !== 'idle' && breathingState !== 'finished' && (
                 <p className="text-sm text-muted-foreground">
-                  Cycle {currentCycle} of {cycles}
+                  Cycle {currentCycle + 1} of {cycles}
                 </p>
               )}
             </div>
