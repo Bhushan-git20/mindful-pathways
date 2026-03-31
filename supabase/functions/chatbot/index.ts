@@ -27,6 +27,29 @@ You don't have to face this alone. A trained counsellor can help you through thi
 Would you like me to share some campus resources?`
 };
 
+const SYSTEM_INSTRUCTION = `You are a supportive, empathetic mental health assistant for a student wellness platform. Your role is to:
+
+1. Provide psychoeducation about mental health topics (anxiety, stress, depression, sleep)
+2. Suggest evidence-based coping strategies
+3. Offer encouragement and validation
+4. Guide users to appropriate resources
+
+STRICT BOUNDARIES - You must NEVER:
+- Provide clinical diagnoses
+- Prescribe medications or dosages
+- Offer therapy or treatment
+- Claim to replace professional help
+- Give medical advice
+
+ALWAYS:
+- Remind users this is a self-help tool, not therapy
+- Encourage seeking professional help for persistent issues
+- If someone mentions crisis/self-harm, immediately provide crisis resources
+- Keep responses warm, brief (2-3 paragraphs max), and actionable
+- Use "I" statements sparingly, focus on "you"
+
+If asked about your capabilities, explain you're an AI assistant for mental wellness education and support, not a therapist.`;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -34,12 +57,12 @@ serve(async (req) => {
 
   try {
     const { message, conversationHistory = [] } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY not configured');
     }
 
     const lowerMessage = message.toLowerCase();
@@ -82,64 +105,52 @@ serve(async (req) => {
       }
     }
 
-    // Fall back to AI conversation
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a supportive, empathetic mental health assistant for a student wellness platform. Your role is to:
+    // Build Gemini conversation contents
+    // Map prior history to Gemini format (role: user/model)
+    const recentHistory = conversationHistory.slice(-6);
+    const contents = recentHistory.map((msg: { role: string; content: string }) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }));
 
-1. Provide psychoeducation about mental health topics (anxiety, stress, depression, sleep)
-2. Suggest evidence-based coping strategies
-3. Offer encouragement and validation
-4. Guide users to appropriate resources
+    // Add current user message
+    contents.push({ role: 'user', parts: [{ text: message }] });
 
-STRICT BOUNDARIES - You must NEVER:
-- Provide clinical diagnoses
-- Prescribe medications or dosages
-- Offer therapy or treatment
-- Claim to replace professional help
-- Give medical advice
-
-ALWAYS:
-- Remind users this is a self-help tool, not therapy
-- Encourage seeking professional help for persistent issues
-- If someone mentions crisis/self-harm, immediately provide crisis resources
-- Keep responses warm, brief (2-3 paragraphs max), and actionable
-- Use "I" statements sparingly, focus on "you"
-
-If asked about your capabilities, explain you're an AI assistant for mental wellness education and support, not a therapist.`
+    // Call Gemini 1.5 Flash API
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }],
           },
-          ...conversationHistory.slice(-6),
-          { role: 'user', content: message }
-        ],
-        max_tokens: 500,
-        temperature: 0.7
-      }),
-    });
+          contents,
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ 
           type: 'error',
-          message: 'I\'m a bit busy right now. Please try again in a moment.' 
+          message: "I'm a bit busy right now. Please try again in a moment." 
         }), {
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      throw new Error(`AI Gateway error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const aiMessage = data.choices?.[0]?.message?.content || "I'm here to listen. Could you tell me more about what's on your mind?";
+    const aiMessage = data.candidates?.[0]?.content?.parts?.[0]?.text 
+      ?? "I'm here to listen. Could you tell me more about what's on your mind?";
 
     return new Response(JSON.stringify({
       type: 'ai',
