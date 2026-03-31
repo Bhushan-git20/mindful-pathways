@@ -214,17 +214,15 @@ export default function Community() {
                           {post.likes}
                         </button>
                       </div>
-                      <div 
-                        role="button"
-                        tabIndex={0}
+                      <button 
+                        type="button"
                         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded px-1"
                         onClick={handleReport}
-                        onKeyDown={(e) => e.key === 'Enter' && handleReport()}
                         aria-label="Report post"
                       >
                         <AlertTriangle className="h-3 w-3" />
                         <span className="text-[10px] font-medium uppercase tracking-tight">Report</span>
-                      </div>
+                      </button>
                     </CardFooter>
                   </Card>
                 ))

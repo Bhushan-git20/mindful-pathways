@@ -229,6 +229,7 @@ export default function Resources() {
   const displayCategories = categories.length > 0 ? categories : [...new Set(defaultResources.map((r) => r.category))];
 
   const bookmarkedResources = allAvailableResources.filter(r => bookmarkedIds.includes(r.id));
+  const filteredBookmarks = bookmarkedResources.filter(searchFilter);
 
   return (
     <PageShell>
@@ -373,7 +374,7 @@ export default function Resources() {
                   ? 'md:grid-cols-1 lg:grid-cols-2' 
                   : 'md:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {(activeCategory === 'Saved' ? bookmarkedResources.filter(searchFilter) : displayResources).map((resource) => {
+                {(activeCategory === 'Saved' ? filteredBookmarks : displayResources).map((resource) => {
                   const IconComponent = categoryIcons[resource.category] || BookOpen;
                   const isMusic = resource.category === 'Music & Relaxation';
                   const videoId = isMusic ? getYouTubeVideoId(resource.external_url) : null;
@@ -457,7 +458,7 @@ export default function Resources() {
               </div>
             )}
             
-            {!loadingResources && activeCategory === 'Saved' && bookmarkedResources.length === 0 && (
+            {!loadingResources && activeCategory === 'Saved' && filteredBookmarks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                  <Heart className="h-16 w-16 text-muted-foreground/20 mb-4" />
                  <h3 className="text-xl font-bold">No saved items yet</h3>
