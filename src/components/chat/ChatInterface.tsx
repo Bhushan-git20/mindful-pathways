@@ -216,69 +216,69 @@ export function ChatInterface() {
         </div>
       )}
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
-        <div className="space-y-4 pb-4">
+        <div className="space-y-6 pb-4 pt-4">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex gap-4 ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {message.role === "assistant" && (
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  message.type === "crisis" ? "bg-red-100" : "bg-primary/10"
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${
+                  message.type === "crisis" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
                 }`}>
-                  <Bot className={`h-4 w-4 ${message.type === "crisis" ? "text-red-600" : "text-primary"}`} />
+                  <Bot className="h-5 w-5" />
                 </div>
               )}
-              <Card className={`max-w-[80%] ${
+              <div className={`max-w-[80%] rounded-2xl px-5 py-4 shadow-sm ${
                 message.role === "user" 
-                  ? "bg-primary text-primary-foreground" 
+                  ? "bg-primary text-primary-foreground rounded-tr-sm" 
                   : message.type === "crisis"
-                    ? "bg-red-50 border-red-200"
-                    : "bg-card"
+                    ? "bg-destructive/5 border border-destructive/20 rounded-tl-sm"
+                    : "bg-card/80 backdrop-blur-md border border-border/50 rounded-tl-sm"
               }`}>
-                <CardContent className="p-3">
-                  {message.type === "crisis" && (
-                    <div className="flex items-center gap-2 mb-2 text-red-600">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Support Resources</span>
-                    </div>
-                  )}
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </CardContent>
-              </Card>
+                {message.type === "crisis" && (
+                  <div className="flex items-center gap-2 mb-3 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-sm font-semibold tracking-wide uppercase">Support Resources</span>
+                  </div>
+                )}
+                <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              </div>
               {message.role === "user" && (
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <User className="h-4 w-4 text-muted-foreground" />
+                <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <User className="h-5 w-5 text-secondary" />
                 </div>
               )}
             </div>
           ))}
           {isLoading && (
-            <div className="flex gap-3">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bot className="h-4 w-4 text-primary" />
+            <div className="flex gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
+                <Bot className="h-5 w-5 text-primary" />
               </div>
-              <Card className="bg-card">
-                <CardContent className="p-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                </CardContent>
-              </Card>
+              <div className="bg-card/80 backdrop-blur-md border border-border/50 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="flex gap-2 pt-4 border-t">
+      <div className="flex gap-3 pt-6 border-t border-border/50 bg-background/50 backdrop-blur-sm mt-2">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type your message..."
           disabled={isLoading}
-          className="flex-1"
+          className="flex-1 rounded-full px-6 py-6 bg-card border-border/50 shadow-sm focus-visible:ring-primary/20 text-base"
         />
-        <Button onClick={sendMessage} disabled={!input.trim() || isLoading}>
-          <Send className="h-4 w-4" />
+        <Button 
+          onClick={sendMessage} 
+          disabled={!input.trim() || isLoading}
+          className="rounded-full h-12 w-12 p-0 shadow-md hover:shadow-lg transition-all"
+        >
+          <Send className="h-5 w-5" />
         </Button>
       </div>
     </div>

@@ -69,15 +69,46 @@ export function AssessmentForm({ onComplete }: AssessmentFormProps) {
     if (!user || !allAnswered) return;
 
     setIsSubmitting(true);
-    const assessmentResult = getCombinedAssessmentResult(responses);
+    // Calculate raw scores locally
+    const phq9Score = responses.slice(0, 9).reduce((a, b) => (a || 0) + (b || 0), 0) || 0;
+    const gad7Score = responses.slice(9, 16).reduce((a, b) => (a || 0) + (b || 0), 0) || 0;
+    const hasSuicidalIdeation = responses[8] ? responses[8] > 0 : false;
+    
+    const getBand = (score: number, thresholds: number[], bands: string[]) => {
+      for (let i = 0; i < thresholds.length; i++) {
+        if (score <= thresholds[i]) return bands[i];
+      }
+      return bands[bands.length - 1];
+    };
+
+    const phq9Band = getBand(phq9Score, [4, 9, 14, 19], ["minimal", "mild", "moderate", "moderately_severe", "severe"]);
+    const gad7Band = getBand(gad7Score, [4, 9, 14], ["minimal", "mild", "moderate", "severe"]);
 
     try {
+      // Ask Gemini to evaluate the nuance
+      const { data, error: funcError } = await supabase.functions.invoke("evaluate-assessment", {
+        body: {
+          responses,
+          questions: COMBINED_QUESTIONS
+        }
+      });
+
+      if (funcError) throw funcError;
+
+      const assessmentResult: CombinedAssessmentResult = {
+        phq9: { score: phq9Score, band: phq9Band },
+        gad7: { score: gad7Score, band: gad7Band },
+        overallRisk: data.overallRisk || (hasSuicidalIdeation ? 'high' : 'medium'),
+        overallInterpretation: data.overallInterpretation || "Evaluation completed.",
+        hasSuicidalIdeation
+      };
+
       // Save combined assessment
       const { error } = await supabase.from("assessments").insert({
         user_id: user.id,
         assessment_type: "PHQ-9+GAD-7",
         responses: responses,
-        total_score: assessmentResult.phq9.score + assessmentResult.gad7.score,
+        total_score: phq9Score + gad7Score,
         severity: assessmentResult.overallRisk === "high" ? "severe" : 
                   assessmentResult.overallRisk === "medium" ? "moderate" : "minimal",
         interpretation: assessmentResult.overallInterpretation
@@ -89,26 +120,26 @@ export function AssessmentForm({ onComplete }: AssessmentFormProps) {
       await supabase.from("risk_scores").insert({
         user_id: user.id,
         overall_risk: assessmentResult.overallRisk,
-        combined_score: assessmentResult.phq9.score + assessmentResult.gad7.score,
+        combined_score: phq9Score + gad7Score,
         assessment_component: {
-          phq9_score: assessmentResult.phq9.score,
-          phq9_severity: assessmentResult.phq9.band,
-          gad7_score: assessmentResult.gad7.score,
-          gad7_severity: assessmentResult.gad7.band,
-          suicidal_ideation: assessmentResult.hasSuicidalIdeation
+          phq9_score: phq9Score,
+          phq9_severity: phq9Band,
+          gad7_score: gad7Score,
+          gad7_severity: gad7Band,
+          suicidal_ideation: hasSuicidalIdeation
         }
       });
 
       setResult(assessmentResult);
       toast({
-        title: "Assessment Completed",
-        description: "Your responses have been saved securely."
+        title: "Assessment Evaluated",
+        description: "Your responses have been securely analyzed by your AI companion."
       });
     } catch (error) {
-      console.error("Error saving assessment:", error);
+      console.error("Error evaluating assessment:", error);
       toast({
-        title: "Error",
-        description: "Failed to save assessment. Please try again.",
+        title: "Evaluation Error",
+        description: "Failed to evaluate your assessment. Please try again.",
         variant: "destructive"
       });
     } finally {

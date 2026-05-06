@@ -42,9 +42,9 @@ export default function Index() {
   ];
 
   const exploreLinks = [
-    { title: 'Mindfulness Techniques', href: '/resources' },
-    { title: 'Improving Focus', href: '/resources' },
-    { title: 'Managing Stress', href: '/resources' },
+    { title: 'Community Support', href: '/community' },
+    { title: 'Habit Tracking', href: '/habits' },
+    { title: 'Smart Journaling', href: '/journal' },
   ];
 
   return (

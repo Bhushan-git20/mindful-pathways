@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Send, User, MessageCircle, Heart, Shield, Info, AlertTriangle, Filter, Sparkles, Plus } from 'lucide-react';
+import { Send, Heart, Info, AlertTriangle, Sparkles, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { format, subMinutes } from 'date-fns';
 import PageShell from '@/components/layout/PageShell';
+import { supabase } from '@/integrations/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Post {
   id: string;
@@ -15,74 +16,88 @@ interface Post {
   content: string;
   timestamp: string;
   likes: number;
-  mood?: string;
+  tag?: string;
   isLiked?: boolean;
 }
 
 const SAMPLE_POSTS: Post[] = [
-  { id: '1', author: 'Anonymous Owl', content: 'Remember that it\'s okay to have bad days. Be gentle with yourself today. 💙', timestamp: subMinutes(new Date(), 15).toISOString(), likes: 24, mood: 'Empathy', isLiked: true },
-  { id: '2', author: 'Calm River', content: 'Just finished my first meditation in weeks! Feeling much lighter.', timestamp: subMinutes(new Date(), 45).toISOString(), likes: 12, mood: 'Progress', isLiked: false },
-  { id: '3', author: 'Kind Soul', content: 'You are enough. Exactly as you are. Don\'t let anyone tell you otherwise.', timestamp: subMinutes(new Date(), 120).toISOString(), likes: 45, mood: 'Support', isLiked: false },
+  { id: '1', author: 'Anonymous', content: 'Remember that it\'s okay to have bad days. Be gentle with yourself today. 💙', timestamp: subMinutes(new Date(), 15).toISOString(), likes: 24, tag: '#Support', isLiked: true },
+  { id: '2', author: 'Anonymous', content: 'Just finished my first meditation in weeks! Feeling much lighter.', timestamp: subMinutes(new Date(), 45).toISOString(), likes: 12, tag: '#Wins', isLiked: false },
+  { id: '3', author: 'Anonymous', content: 'Struggling a bit with anxiety today, but I am trying to focus on my breathing.', timestamp: subMinutes(new Date(), 120).toISOString(), likes: 45, tag: '#Struggles', isLiked: false },
 ];
 
-const MOOD_TYPES = ['Gratitude', 'Progress', 'Support', 'Empathy', 'Motivation', 'Zen'];
+const TAGS = ['#Wins', '#Struggles', '#Support', '#Gratitude'];
 
 export default function Community() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
-  const [selectedMood, setSelectedMood] = useState(MOOD_TYPES[0]);
+  const [selectedTag, setSelectedTag] = useState(TAGS[0]);
   const [loading, setLoading] = useState(true);
+  const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
-    // Simulate loading data with cleanup
     const timer = setTimeout(() => {
-      try {
-        const saved = localStorage.getItem('mindmate_community');
-        if (saved) {
-          setPosts(JSON.parse(saved));
-        } else {
-          setPosts(SAMPLE_POSTS);
-          localStorage.setItem('mindmate_community', JSON.stringify(SAMPLE_POSTS));
-        }
-      } catch (error) {
-        console.error("Failed to parse community posts:", error);
+      const saved = localStorage.getItem('mindmate_community');
+      if (saved) {
+        setPosts(JSON.parse(saved));
+      } else {
         setPosts(SAMPLE_POSTS);
         localStorage.setItem('mindmate_community', JSON.stringify(SAMPLE_POSTS));
-      } finally {
-        setLoading(false);
       }
-    }, 800);
-
+      setLoading(false);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleReport = () => {
-    toast.info("Reporting feature coming soon. Our moderators are currently monitoring the feed manually.");
-  };
-
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     if (!newPostContent.trim()) return;
     
-    if (newPostContent.length < 10) {
-      toast.error('Post content is too short!');
+    if (newPostContent.length < 5) {
+      toast.error('Your message is too short.');
       return;
     }
 
-    const newPost: Post = {
-      id: Math.random().toString(36).substring(7),
-      author: 'Anonymous Student',
-      content: newPostContent,
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      mood: selectedMood,
-      isLiked: false
-    };
+    setIsPosting(true);
 
-    const updated = [newPost, ...posts];
-    setPosts(updated);
-    localStorage.setItem('mindmate_community', JSON.stringify(updated));
-    setNewPostContent('');
-    toast.success('Your message of support was shared! 🌟');
+    try {
+      // Hit moderation edge function
+      const { data, error } = await supabase.functions.invoke('moderate-post', {
+        body: { content: newPostContent }
+      });
+
+      if (error) throw error;
+
+      if (!data.isSafe) {
+        toast.error('Post Blocked', {
+          description: data.reason || 'This post violates community guidelines.',
+          duration: 8000,
+        });
+        setIsPosting(false);
+        return;
+      }
+
+      // Safe to post
+      const newPost: Post = {
+        id: Math.random().toString(36).substring(7),
+        author: 'Anonymous',
+        content: newPostContent,
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        tag: selectedTag,
+        isLiked: false
+      };
+
+      const updated = [newPost, ...posts];
+      setPosts(updated);
+      localStorage.setItem('mindmate_community', JSON.stringify(updated));
+      setNewPostContent('');
+      toast.success('Your message was shared safely! 🌟');
+    } catch (err) {
+      console.error('Moderation error:', err);
+      toast.error('Failed to post. Please try again later.');
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   const toggleLike = (id: string) => {
@@ -101,179 +116,98 @@ export default function Community() {
   };
 
   return (
-    <PageShell>
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold font-display text-foreground">Community Support</h1>
-            <p className="text-muted-foreground mt-1">Anonymous messages of kindness and solidarity</p>
+    <PageShell maxWidth="md">
+      <div className="py-8 space-y-10">
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Sparkles className="h-6 w-6 text-primary" />
           </div>
-          <div className="hidden md:flex gap-2">
-            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 gap-1 px-3 py-1">
-              <Shield className="h-3 w-3" /> Anonymous
-            </Badge>
-          </div>
+          <h1 className="text-3xl font-bold font-display text-foreground">Community Support</h1>
+          <p className="text-muted-foreground text-lg">A safe, anonymous space to share and support each other.</p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main Feed Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Create Post Card */}
-            <Card className="border-primary/20 shadow-sm bg-primary/5">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-primary" /> Share Support
-                </CardTitle>
-                <CardDescription>Only messages of encouragement and kindness are allowed here.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea 
-                  placeholder="Write something kind to brighten someone's day..." 
-                  className="min-h-[120px] bg-background border-primary/10 transition-all focus:border-primary/50"
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                />
-                
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {MOOD_TYPES.map(m => (
-                      <Badge 
-                        key={m} 
-                        className={`cursor-pointer transition-all hover:scale-110 ${
-                          selectedMood === m ? 'bg-primary' : 'bg-muted text-muted-foreground'
-                        }`}
-                        onClick={() => setSelectedMood(m)}
-                      >
-                        {m}
-                      </Badge>
-                    ))}
-                  </div>
-                  <Button onClick={handleCreatePost} className="gap-2 px-8 rounded-full">
-                    <Send className="h-4 w-4" /> Share
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-primary" /> Recent Messages
-                </h3>
-                <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-                  <Filter className="h-3 w-3" /> Latest
-                </Button>
+        <Card className="border-transparent bg-card/60 backdrop-blur-md shadow-lg">
+          <CardContent className="p-6 space-y-4">
+            <Textarea 
+              placeholder="Share a win, a struggle, or some words of support..." 
+              className="min-h-[100px] resize-none bg-background border-muted"
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+              disabled={isPosting}
+            />
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                {TAGS.map(t => (
+                  <Badge 
+                    key={t} 
+                    variant={selectedTag === t ? 'default' : 'secondary'}
+                    className="cursor-pointer transition-all px-3 py-1 text-sm font-normal"
+                    onClick={() => setSelectedTag(t)}
+                  >
+                    {t}
+                  </Badge>
+                ))}
               </div>
+              <Button onClick={handleCreatePost} disabled={isPosting || !newPostContent.trim()} className="gap-2 rounded-full px-6">
+                {isPosting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Share
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader className="h-24 bg-muted/30"></CardHeader>
-                  </Card>
-                ))
-              ) : posts.length === 0 ? (
-                <div className="text-center py-10 opacity-50">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                  <p>Be the first to share some kindness!</p>
-                </div>
-              ) : (
-                posts.map(post => (
-                  <Card key={post.id} className="transition-all hover:shadow-md border-muted">
-                    <CardHeader className="pb-2 pt-4 px-6">
-                      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="font-semibold text-lg">Recent Notes</h2>
+          <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Filtered for safety</span>
+        </div>
+
+        <div className="space-y-4">
+          {loading ? (
+            <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary/50" /></div>
+          ) : (
+            <AnimatePresence>
+              {posts.map(post => (
+                <motion.div key={post.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="border-transparent bg-card shadow-sm hover:shadow-md transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                            A
                           </div>
                           <div>
-                            <p className="text-sm font-semibold">{post.author}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase opacity-70">
-                              {format(new Date(post.timestamp), 'MMM d, h:mm a')}
-                            </p>
+                            <p className="text-sm font-semibold text-foreground">{post.author}</p>
+                            <p className="text-[10px] text-muted-foreground">{format(new Date(post.timestamp), 'MMM d, h:mm a')}</p>
                           </div>
                         </div>
-                        {post.mood && (
-                          <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider bg-primary/5 text-primary border-primary/20">
-                            <Sparkles className="h-3 w-3 mr-1" /> {post.mood}
-                          </Badge>
-                        )}
+                        <Badge variant="outline" className="text-xs bg-muted/30 border-muted">
+                          {post.tag}
+                        </Badge>
                       </div>
-                    </CardHeader>
-                    <CardContent className="px-6 py-4">
-                      <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-                    </CardContent>
-                    <CardFooter className="px-6 py-3 bg-muted/5 flex justify-between">
-                      <div className="flex gap-4">
-                        <button 
-                          className={`flex items-center gap-1.5 transition-all text-sm font-medium ${
-                            post.isLiked ? 'text-rose-500 scale-110' : 'text-muted-foreground hover:text-rose-500'
-                          }`}
+                      
+                      <p className="text-foreground/90 mb-6">{post.content}</p>
+                      
+                      <div className="flex justify-between items-center border-t border-border/50 pt-4 mt-2">
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className={`gap-2 rounded-full ${post.isLiked ? 'text-rose-500 bg-rose-50' : 'text-muted-foreground'}`}
                           onClick={() => toggleLike(post.id)}
                         >
                           <Heart className={`h-4 w-4 ${post.isLiked ? 'fill-current' : ''}`} />
-                          {post.likes}
-                        </button>
+                          {post.likes} {post.likes === 1 ? 'Hug' : 'Hugs'}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-muted-foreground h-8 w-8 p-0 rounded-full" aria-label="Report">
+                          <AlertTriangle className="h-4 w-4 opacity-50 hover:opacity-100" />
+                        </Button>
                       </div>
-                      <button 
-                        type="button"
-                        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded px-1"
-                        onClick={handleReport}
-                        aria-label="Report post"
-                      >
-                        <AlertTriangle className="h-3 w-3" />
-                        <span className="text-[10px] font-medium uppercase tracking-tight">Report</span>
-                      </button>
-                    </CardFooter>
+                    </CardContent>
                   </Card>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Guidelines Sidebar Column */}
-          <div className="space-y-6">
-            <Card className="border-amber-200/50 bg-amber-50 dark:bg-amber-950/20">
-              <CardHeader className="p-4">
-                <CardTitle className="text-md flex items-center gap-2 text-amber-700 dark:text-amber-500">
-                  <Shield className="h-4 w-4" /> Community Rules
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 text-sm space-y-3 text-amber-800/80 dark:text-amber-400/80">
-                <div className="flex gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
-                  <p>Keep it kind, respectful, and supportive.</p>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
-                  <p>Do not share personal identifying information (PII).</p>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
-                  <p>Hate speech, spam, and trolling are strictly prohibited.</p>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
-                  <p>This is not a space for clinical diagnosis or emergency help.</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-4">
-                <CardTitle className="text-md flex items-center gap-2">
-                  <Info className="h-4 w-4 text-primary" /> About Privacy
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 space-y-3">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Your identity is protected. We display "Anonymous Student" or an alias to ensure you can express yourself freely without judgment.
-                </p>
-                <div className="p-3 bg-muted/50 rounded-lg border border-dashed text-[10px] text-muted-foreground uppercase font-bold text-center">
-                  Private & Secure Platform
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </PageShell>

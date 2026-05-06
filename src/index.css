@@ -18,8 +18,8 @@
 
 @layer base {
   :root {
-    /* Core palette - vibrant healing theme with beige background */
-    --background: 34 36% 93%;
+    /* Core palette - Google Stitch Minimalist Theme */
+    --background: 210 17% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -28,21 +28,21 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary - calming indigo-purple */
-    --primary: 250 89% 65%;
+    /* Primary - Deep calming blue (#2A5C82) */
+    --primary: 206 51% 34%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - soft teal for balance */
-    --secondary: 174 58% 39%;
+    /* Secondary - Soft teal (#5C9EAD) */
+    --secondary: 191 35% 52%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - gentle lavender gray */
+    /* Muted - gentle gray */
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
 
-    /* Accent - warm peach/coral for highlights */
-    --accent: 24 95% 92%;
-    --accent-foreground: 24 80% 35%;
+    /* Accent - Sage green (#8FBC8F) */
+    --accent: 120 25% 65%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -377,5 +377,176 @@
     50% {
       transform: translateY(-10px);
     }
+  }
+
+  /* Stitch Custom Classes */
+  .atmospheric-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 30%, #2a5c82 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, #351e76 0%, transparent 40%),
+                  radial-gradient(circle at 50% 50%, #0d141a 0%, #080f15 100%);
+      filter: blur(60px);
+  }
+
+  .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .clay-card {
+      background: #2a5c82;
+      box-shadow: 
+          inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+          inset -8px -8px 16px rgba(0, 0, 0, 0.2),
+          0 20px 40px rgba(0, 0, 0, 0.4);
+      border-radius: 2rem;
+  }
+
+  .clay-inset {
+      background: #151c23;
+      box-shadow: 
+          inset 4px 4px 8px rgba(0, 0, 0, 0.5),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+  }
+
+  .luminous-shadow {
+      box-shadow: 0 0 30px rgba(156, 203, 247, 0.3);
+  }
+
+  .glass-orb {
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%),
+                  radial-gradient(circle at 70% 70%, rgba(0, 238, 252, 0.1), transparent 70%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .luminous-mesh {
+      background: 
+          radial-gradient(circle at 20% 20%, rgba(42, 92, 130, 0.4) 0%, transparent 40%),
+          radial-gradient(circle at 80% 80%, rgba(94, 74, 161, 0.3) 0%, transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(13, 20, 26, 1) 0%, transparent 100%);
+  }
+
+  .clay-card-auth {
+      background: rgba(25, 32, 39, 0.7);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+          0 20px 50px rgba(0, 0, 0, 0.5),
+          inset 0 2px 4px rgba(255, 255, 255, 0.1),
+          inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+      border-radius: 1rem;
+  }
+
+  .clay-button-primary {
+      background: linear-gradient(135deg, #9ccbf7 0%, #2a5c82 100%);
+      box-shadow: 
+          0 10px 20px rgba(42, 92, 130, 0.4),
+          inset 2px 2px 6px rgba(255, 255, 255, 0.4),
+          inset -2px -2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .clay-input {
+      box-shadow: 
+          inset 4px 4px 8px rgba(0, 0, 0, 0.3),
+          inset -2px -2px 4px rgba(255, 255, 255, 0.05);
+      background: rgba(8, 15, 21, 0.6);
+  }
+
+  .glass-social {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+  }
+
+  .glass-social:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+  }
+
+  .orb-glow {
+      filter: blur(60px);
+      opacity: 0.5;
+  }
+
+  .clay-pill-ai {
+      background: #192027;
+      box-shadow: 
+          inset 4px 4px 8px rgba(255, 255, 255, 0.05),
+          inset -4px -4px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(156, 203, 247, 0.1);
+  }
+
+  .clay-pill-user {
+      background: #2a5c82;
+      box-shadow: 
+          inset 4px 4px 8px rgba(255, 255, 255, 0.2),
+          inset -4px -4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .clay-inset-input {
+      background: #0d141a;
+      box-shadow: 
+          inset 4px 4px 10px rgba(0, 0, 0, 0.5),
+          inset -2px -2px 5px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Journal Custom Classes */
+  .mood-selector {
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 
+          inset 6px 6px 12px rgba(0, 0, 0, 0.3),
+          inset -6px -6px 12px rgba(255, 255, 255, 0.05);
+      border-radius: 2rem;
+  }
+  .mood-item {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+      box-shadow: 
+          6px 6px 12px rgba(0, 0, 0, 0.2),
+          -4px -4px 10px rgba(255, 255, 255, 0.05),
+          inset 2px 2px 4px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .mood-item:hover {
+      transform: translateY(-8px) scale(1.1);
+  }
+  .mood-item.selected {
+      border: 2px solid #00eefc;
+      background: rgba(0, 238, 252, 0.1);
+  }
+  .glass-orb-fab {
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%),
+                  linear-gradient(135deg, #00eefc 0%, #2a5c82 100%);
+      box-shadow: 0 15px 35px rgba(0, 238, 252, 0.4);
+      position: relative;
+      overflow: hidden;
+  }
+  .glass-orb-fab::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 30%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+      border-radius: 50%;
+  }
+  .inset-input {
+      background: rgba(8, 15, 21, 0.4);
+      box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .progress-ring-clay {
+      filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.4));
   }
 }

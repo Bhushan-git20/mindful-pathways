@@ -44,7 +44,7 @@ export default function PageShell({
       </main>
 
       {showFooter && (
-        <footer className="border-t border-border/50 bg-card/40 backdrop-blur-sm mt-auto">
+        <footer className="bg-card/40 backdrop-blur-xl mt-auto shadow-[0_-4px_25px_rgba(0,0,0,0.02)]">
           <div className="container py-8 px-4 sm:px-6 lg:px-8">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {/* Brand */}
@@ -66,16 +66,16 @@ export default function PageShell({
                   <Link to="/assessments" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Assessments</Link>
                   <Link to="/journal" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Journal</Link>
                   <Link to="/chat" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Chat Support</Link>
+                  <Link to="/resources" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Resources</Link>
                 </nav>
               </div>
 
-              {/* Resources */}
+              {/* Insights */}
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resources</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Insights</h4>
                 <nav className="flex flex-col gap-1.5">
-                  <Link to="/resources" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</Link>
+                  <Link to="/progress" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Wellness Progress</Link>
                   <Link to="/trends" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Wellness Trends</Link>
-                  <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Assessment History</Link>
                 </nav>
               </div>
 

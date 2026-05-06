@@ -89,7 +89,7 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
   };
 
   return (
-    <Card>
+    <Card className="border-transparent bg-card/60 backdrop-blur-md shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />

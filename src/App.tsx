@@ -12,17 +12,15 @@ import Assessments from "./pages/Assessments";
 import Journal from "./pages/Journal";
 import Chat from "./pages/Chat";
 import Trends from "./pages/Trends";
-import History from "./pages/History";
+import Progress from "./pages/Progress";
 import Admin from "./pages/Admin";
-import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
-
-import Breathing from "./pages/Breathing";
 import Habits from "./pages/Habits";
 import Community from "./pages/Community";
+import Resources from "./pages/Resources";
 
 const queryClient = new QueryClient();
 
@@ -42,13 +40,12 @@ const App = () => (
               <Route path="/journal" element={<Journal />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/trends" element={<Trends />} />
+              <Route path="/progress" element={<Progress />} />
               <Route path="/insights" element={<Trends />} />
-              <Route path="/history" element={<History />} />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/resources" element={<Resources />} />
-              <Route path="/breathing" element={<Breathing />} />
               <Route path="/habits" element={<Habits />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/resources" element={<Resources />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />

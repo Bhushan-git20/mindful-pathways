@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Library, History, Bell, Sun, Moon, Target, Users, Wind } from 'lucide-react';
+import { Brain, LogOut, User, Shield, Settings, Home, ClipboardList, BookOpen, MessageCircle, TrendingUp, Bell, Sun, Moon, Target, Users, Library } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,11 +12,10 @@ const navItems = [
   { href: '/community', label: 'Community', icon: Users },
   { href: '/journal', label: 'Journal', icon: BookOpen },
   { href: '/habits', label: 'Habits', icon: Target },
-  { href: '/resources', label: 'Library', icon: Library },
-  { href: '/breathing', label: 'Breathe', icon: Wind },
   { href: '/chat', label: 'AI Chat', icon: MessageCircle },
   { href: '/trends', label: 'Trends', icon: TrendingUp },
   { href: '/assessments', label: 'Tests', icon: ClipboardList },
+  { href: '/resources', label: 'Resources', icon: Library },
 ];
 
 export default function AppHeader() {
@@ -59,7 +58,7 @@ export default function AppHeader() {
   }, [user]);
 
   return (
-    <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="bg-card/60 backdrop-blur-xl sticky top-0 z-50 shadow-sm transition-all duration-300">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/dashboard')}>
