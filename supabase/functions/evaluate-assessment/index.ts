@@ -48,7 +48,7 @@ serve(async (req) => {
     You are a clinical psychologist evaluator. A user has just completed a mental wellness assessment containing standard psychological questions (PHQ-9 and GAD-7).
     
     Here are the questions and the user's responses (0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day):
-    ${questions.map((q: any, i: number) => `Q: ${q.text} | Answer Score: ${responses[i]}`).join('\n')}
+    ${questions.map((q: { text: string }, i: number) => `Q: ${q.text} | Answer Score: ${responses[i]}`).join('\n')}
 
     Analyze these responses. Provide an honest, compassionate evaluation. DO NOT just add the scores up. Look at the context of what they are experiencing. Are they giving positive answers because they misunderstand the scale, or are they genuinely struggling? Provide a nuanced risk level.
 
@@ -89,7 +89,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error evaluating assessment:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
