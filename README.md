@@ -96,6 +96,10 @@ mindful-pathways/
 │   │   ├── History.tsx   # Restored assessment & activity history logs
 │   │   ├── Resources.tsx # Curated library and CRUD panel
 │   │   ├── Profile.tsx   # User personal settings & security
+│   │   ├── Settings.tsx  # App configuration and preferences
+│   │   ├── Notifications.tsx # User alerts and reminders
+│   │   ├── Progress.tsx  # Goal and milestone tracking
+│   │   ├── NotFound.tsx  # 404 Error page
 │   │   └── Admin.tsx     # Administrator analytics & Resource CRUD
 │   ├── components/      # Glassmorphic shells, forms, charts, & navigation
 │   ├── hooks/           # Custom React hooks (useAuth, etc.)
