@@ -1,35 +1,19 @@
-# Mind-Mate Wellness Chatbot — Agent Rules
+
+# MindCare � Agent Rules
 
 ## Stack
-Python 3.11 | LangChain 0.3+ | ChromaDB | FAISS | HuggingFace Embeddings
-Gemini 2.5 Flash | Streamlit | Docker | Supabase
+React | TypeScript | FastAPI | PostgreSQL | Supabase | Gemini API | Docker | AWS
 
-## File map
-app.py                  — Streamlit UI entry
-rag_pipeline.py         — ConversationalRetrievalChain logic
-vector_store.py         — ChromaDB + FAISS indexing
-document_loader.py      — PDF ingestion (PyMuPDF)
-config.py               — env vars, constants only (no logic)
+## Architecture
+Frontend (React/TS) -> FastAPI backend -> PostgreSQL (Supabase) -> Gemini API
 
-## Coding rules
-- All LangChain chains: add error handling + fallback model
-- Embedding calls: always batch — never loop single docs
-- Chat history: session_state only (no DB for MVP)
-- Source attribution: shown in EVERY response
-- New feature = new file. Never add to existing files unless fixing a bug.
+## Rules
+- All API endpoints: Pydantic v2 models for request/response validation
+- Auth: JWT tokens via python-jose, refresh token pattern
+- DB queries: SQLAlchemy 2.0 async (no raw SQL except migrations)
+- Frontend: Tailwind CSS only � no inline styles except dynamic values
+- API errors: always return {detail: string, code: string} shape
 
-## Test requirements
-- Test with minimum 3 different PDFs before committing
-- Cover: single PDF, multi-PDF, PDF with tables, PDF with images
-- Run: `pytest tests/ -v` before any push
-
-## MCP to use
-- Filesystem MCP: read/write project files
-- Context7 MCP: get latest LangChain API docs when stuck
-- GitHub MCP: commit + push after stable milestones
-
-## What NOT to do
-- Do not use deprecated LangChain v0.1 API (no `ConversationalRetrievalChain.from_llm`)
-- Do not store API keys in code
-- Do not use pickle for ChromaDB — use native persist()
-- Do not auto-run tests — wait for my signal
+## Supabase MCP
+Use Supabase MCP to check schema before writing any query.
+Never guess column names.
